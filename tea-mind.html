@@ -1,0 +1,2484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>茗语 Ming AI — AI 茶艺师</title>
+<style>
+/* ============ CSS Variables ============ */
+:root {
+  --green-deep: #274F33;
+  --green: #47775A;
+  --green-light: #7BA882;
+  --green-pale: #BFD8C0;
+  --green-mist: #E9F1E6;
+  --cream: #FAF7F1;
+  --cream-dark: #EFE8DA;
+  --wood: #C4A882;
+  --wood-light: #DFCCAB;
+  --wood-dark: #9C7F51;
+  --text: #2C3E2D;
+  --text-light: #55665A;
+  --text-muted: #8A9A8B;
+  --white: #FFFFFF;
+  --line: rgba(196,168,130,0.22);
+  --shadow-xs: 0 1px 2px rgba(35,58,40,0.05);
+  --shadow-sm: 0 2px 6px rgba(35,58,40,0.05), 0 1px 2px rgba(35,58,40,0.04);
+  --shadow: 0 8px 28px -10px rgba(35,58,40,0.18), 0 2px 6px rgba(35,58,40,0.05);
+  --shadow-lg: 0 24px 60px -22px rgba(35,58,40,0.30), 0 6px 16px rgba(35,58,40,0.08);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-xs: 9px;
+  --transition: 0.32s cubic-bezier(0.22,0.61,0.36,1);
+  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* ============ Reset ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-sans);color:var(--text);line-height:1.65;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;background:
+  radial-gradient(1100px 620px at 88% -10%, rgba(123,168,130,0.16), transparent 62%),
+  radial-gradient(900px 540px at -12% 108%, rgba(196,168,130,0.16), transparent 60%),
+  linear-gradient(180deg,#FBF8F2 0%,#F7F2E9 100%);
+  background-attachment:fixed}
+::selection{background:rgba(74,124,89,0.22);color:var(--text)}
+img{max-width:100%;display:block}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit;outline:none}
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--green-pale);border-radius:3px}
+
+/* ============ Layout ============ */
+.app{display:flex;min-height:100vh}
+
+/* ============ Sidebar ============ */
+.sidebar{width:260px;color:var(--white);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform var(--transition);
+  background:
+    radial-gradient(120% 55% at 18% 0%, rgba(255,255,255,0.10), transparent 58%),
+    linear-gradient(180deg,#274F33 0%,#356344 46%,#497B58 100%);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,0.08), 14px 0 40px -26px rgba(20,40,25,0.65)}
+.sidebar::after{content:'🍃';position:absolute;right:-30px;bottom:58px;font-size:180px;opacity:0.05;pointer-events:none;transform:rotate(-14deg)}
+.sidebar-header{padding:32px 24px 24px;border-bottom:1px solid rgba(255,255,255,0.12)}
+.sidebar-logo{display:flex;align-items:center;gap:12px}
+.sidebar-logo-icon{width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;backdrop-filter:blur(10px)}
+.sidebar-logo-text h1{font-family:var(--font-serif);font-size:20px;font-weight:600;letter-spacing:2px}
+.sidebar-logo-text span{font-size:11px;opacity:0.7;letter-spacing:1px}
+.sidebar-nav{flex:1;padding:20px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:11px;color:rgba(255,255,255,0.76);transition:background var(--transition),color var(--transition),transform var(--transition);font-size:15px;background:none;width:100%;text-align:left;position:relative}
+.nav-item:hover{background:rgba(255,255,255,0.10);color:#fff;transform:translateX(2px)}
+.nav-item.active{background:linear-gradient(90deg,rgba(255,255,255,0.22),rgba(255,255,255,0.09));color:#fff;font-weight:500;box-shadow:inset 0 1px 0 rgba(255,255,255,0.12)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:linear-gradient(180deg,var(--wood-light),var(--wood));border-radius:0 3px 3px 0}
+.nav-icon{font-size:20px;width:24px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--wood);color:var(--text);font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.sidebar-footer{padding:20px 24px;border-top:1px solid rgba(255,255,255,0.12);font-size:13px;opacity:0.7}
+.sidebar-footer .disclaimer{font-size:11px;opacity:0.5;margin-top:4px}
+
+/* ============ Main Content ============ */
+.main{margin-left:260px;flex:1;min-height:100vh}
+.page{display:none;padding:34px 40px;animation:fadeIn 0.45s ease;max-width:1440px;margin:0 auto}
+.page.active{display:block}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes steam{0%{opacity:0;transform:translateY(0) scaleX(1)}50%{opacity:0.6;transform:translateY(-20px) scaleX(1.5)}100%{opacity:0;transform:translateY(-40px) scaleX(2)}}
+
+/* ============ Home Page ============ */
+.home-hero{position:relative;overflow:hidden;margin-bottom:32px;padding:52px 44px;border-radius:calc(var(--radius) + 4px);border:1px solid var(--line);box-shadow:var(--shadow);
+  background:
+    radial-gradient(120% 150% at 100% 0%, rgba(123,168,130,0.22), transparent 55%),
+    radial-gradient(100% 130% at 0% 100%, rgba(196,168,130,0.20), transparent 55%),
+    linear-gradient(135deg,#EDF4E9 0%,#FAF7F2 46%,#F2EBDD 100%)}
+.home-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:240px;height:240px;background:radial-gradient(circle,rgba(74,124,89,0.10) 0%,transparent 70%);border-radius:50%}
+.home-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(196,168,130,0.12) 0%,transparent 70%);border-radius:50%}
+.hero-content{position:relative;z-index:1;max-width:600px}
+.hero-greeting{font-size:14px;color:var(--green);font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.hero-title{font-family:var(--font-serif);font-size:38px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.32;letter-spacing:0.5px}
+.hero-subtitle{font-size:16px;color:var(--text-light);line-height:1.78;margin-bottom:26px}
+.hero-tea-icon{position:absolute;right:44px;top:50%;transform:translateY(-50%);width:150px;height:150px;display:flex;align-items:center;justify-content:center;font-size:86px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,0.95),rgba(233,241,230,0.55) 70%);
+  box-shadow:0 26px 60px -26px rgba(35,58,40,0.38), inset 0 1px 0 #fff;
+  animation:float 4.5s ease-in-out infinite}
+
+.daily-tea{background:var(--white);border-radius:var(--radius);padding:28px 32px;margin-bottom:32px;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;align-items:center;gap:28px}
+.daily-tea-badge{flex-shrink:0;width:80px;height:80px;background:radial-gradient(circle at 32% 28%,#fff,var(--green-mist));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:inset 0 1px 0 #fff,0 8px 18px -12px rgba(44,95,58,0.55)}
+.daily-tea-info{flex:1}
+.daily-tea-label{font-size:12px;color:var(--green);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.daily-tea-name{font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.daily-tea-desc{font-size:14px;color:var(--text-light);margin-bottom:8px}
+.daily-tea-tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 12px;border-radius:20px;background:linear-gradient(135deg,var(--green-mist),#F4F8F1);color:var(--green-deep);font-weight:500;border:1px solid rgba(74,124,89,0.12)}
+
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.action-card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);border:1px solid var(--line);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);cursor:pointer;position:relative;overflow:hidden}
+.action-card::before{content:'';position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--green-light),var(--wood));opacity:0;transition:opacity var(--transition)}
+.action-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--green-pale)}
+.action-card:hover::before{opacity:1}
+.action-card:active{transform:translateY(-2px)}
+.action-card-icon{font-size:36px;margin-bottom:16px;display:block}
+.action-card-title{font-family:var(--font-serif);font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px}
+.action-card-desc{font-size:13px;color:var(--text-muted);line-height:1.5}
+.action-card-arrow{position:absolute;bottom:20px;right:20px;font-size:14px;color:var(--green);opacity:0;transform:translateX(-8px);transition:all var(--transition)}
+.action-card:hover .action-card-arrow{opacity:1;transform:translateX(0)}
+
+.tea-quote{background:var(--white);border-radius:var(--radius);padding:24px 32px;box-shadow:var(--shadow-sm);border-left:4px solid var(--wood);margin-bottom:32px}
+.tea-quote-text{font-family:var(--font-serif);font-size:16px;color:var(--text);font-style:italic;line-height:1.7;margin-bottom:8px}
+.tea-quote-author{font-size:13px;color:var(--text-muted)}
+
+/* ============ Section Headers ============ */
+.section-header{margin-bottom:30px}
+.section-title{font-family:var(--font-serif);font-size:26px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:0.5px;display:flex;align-items:center;gap:12px}
+.section-title::before{content:'';width:6px;height:25px;border-radius:3px;background:linear-gradient(180deg,var(--green-light),var(--green));flex-shrink:0;box-shadow:0 2px 8px -2px rgba(74,124,89,0.6)}
+.section-desc{font-size:14px;color:var(--text-light);padding-left:18px}
+
+/* ============ Tea Encyclopedia ============ */
+.encyclopedia-layout{display:grid;grid-template-columns:1fr 420px;gap:24px;height:calc(100vh - 140px)}
+.category-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.cat-chip{padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;background:var(--white);color:var(--text-light);border:1px solid var(--cream-dark);transition:all var(--transition);cursor:pointer;white-space:nowrap}
+.cat-chip:hover{border-color:var(--green);color:var(--green)}
+.cat-chip.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+.tea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;overflow-y:auto;max-height:calc(100vh - 280px);padding-right:8px}
+.tea-card{background:var(--white);border-radius:var(--radius-sm);padding:20px;box-shadow:var(--shadow-sm);cursor:pointer;transition:all var(--transition);border:2px solid transparent}
+.tea-card:hover{border-color:var(--green-pale);transform:translateY(-2px);box-shadow:var(--shadow)}
+.tea-card.selected{border-color:var(--green);background:var(--green-mist)}
+.tea-card-emoji{font-size:32px;margin-bottom:8px}
+.tea-card-name{font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--text)}
+.tea-card-cat{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+.chat-panel{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.chat-header{padding:20px 24px;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;gap:12px}
+.chat-avatar{width:40px;height:40px;background:var(--green-mist);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.chat-header-text h3{font-size:15px;font-weight:600;color:var(--text)}
+.chat-header-text span{font-size:12px;color:var(--text-muted)}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;min-height:300px}
+.chat-msg{max-width:85%;padding:12px 16px;border-radius:14px;font-size:14px;line-height:1.6;animation:slideUp 0.3s ease}
+.chat-msg.ai{align-self:flex-start;background:var(--green-mist);color:var(--text);border-bottom-left-radius:4px}
+.chat-msg.user{align-self:flex-end;background:var(--green);color:#fff;border-bottom-right-radius:4px}
+.chat-msg .msg-time{font-size:11px;opacity:0.6;margin-top:4px}
+.chat-input-area{display:flex;gap:8px;padding:16px 20px;border-top:1px solid var(--cream-dark)}
+.chat-input{flex:1;padding:12px 16px;border-radius:24px;border:1px solid var(--cream-dark);font-size:14px;background:var(--cream);transition:all var(--transition)}
+.chat-input:focus{border-color:var(--green);background:var(--white)}
+.chat-send{width:44px;height:44px;border-radius:50%;background:var(--green);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);flex-shrink:0}
+.chat-send:hover{background:var(--green-deep);transform:scale(1.05)}
+.suggested-questions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px}
+.suggested-chip{padding:6px 14px;border-radius:16px;font-size:12px;background:var(--green-mist);color:var(--green);cursor:pointer;transition:all var(--transition);border:none}
+.suggested-chip:hover{background:var(--green);color:#fff}
+
+/* ============ Brewing Assistant ============ */
+.brewing-layout{display:grid;grid-template-columns:1fr 380px;gap:24px}
+.brewing-selector{margin-bottom:24px}
+.brewing-selector h3{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)}
+.tea-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.tea-select-card{padding:16px;background:var(--white);border-radius:var(--radius-sm);border:2px solid transparent;cursor:pointer;text-align:center;transition:all var(--transition);box-shadow:var(--shadow-sm)}
+.tea-select-card:hover{border-color:var(--green-pale);transform:translateY(-2px)}
+.tea-select-card.active{border-color:var(--green);background:var(--green-mist)}
+.tea-select-card .emoji{font-size:28px;margin-bottom:8px;display:block}
+.tea-select-card .name{font-size:14px;font-weight:600;color:var(--text)}
+.tea-select-card .cat{font-size:11px;color:var(--text-muted)}
+
+.params-card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.params-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.param-item{text-align:center;padding:16px 12px;background:var(--green-mist);border-radius:var(--radius-sm)}
+.param-icon{font-size:24px;margin-bottom:4px}
+.param-value{font-size:20px;font-weight:700;color:var(--green-deep);font-family:var(--font-serif)}
+.param-label{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+/* Timer */
+.timer-card{background:var(--white);border-radius:var(--radius);padding:32px 24px;box-shadow:var(--shadow);text-align:center}
+.timer-display{width:180px;height:180px;border-radius:50%;background:var(--green-mist);margin:0 auto 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.timer-display.running{background:var(--green-pale)}
+.timer-ring{position:absolute;inset:-4px;border-radius:50%;border:3px solid var(--green-pale)}
+.timer-ring.active{border-color:var(--green);border-top-color:transparent;animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.timer-time{font-size:42px;font-weight:700;color:var(--green-deep);font-family:var(--font-serif);letter-spacing:2px}
+.timer-label{font-size:13px;color:var(--text-muted);margin-top:2px}
+.timer-controls{display:flex;gap:12px;justify-content:center}
+.btn{padding:11px 30px;border-radius:26px;font-size:14px;font-weight:600;letter-spacing:0.3px;transition:transform var(--transition),box-shadow var(--transition),background var(--transition),color var(--transition)}
+.btn-primary{background:linear-gradient(135deg,#548A63,#2F5F3D);color:#fff;box-shadow:0 10px 24px -12px rgba(44,95,58,0.75)}
+.btn-primary:hover{background:linear-gradient(135deg,#5E966D,#2A5636);transform:translateY(-2px);box-shadow:0 16px 32px -14px rgba(44,95,58,0.85)}
+.btn-primary:active{transform:translateY(0)}
+.btn-outline{background:var(--white);color:var(--green);border:1.5px solid rgba(74,124,89,0.35);box-shadow:var(--shadow-xs)}
+.btn-outline:hover{background:var(--green-mist);border-color:var(--green);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text-light)}
+.btn-ghost:hover{color:var(--green);background:rgba(74,124,89,0.06)}
+
+.brewing-steps{margin-top:20px}
+.brewing-steps h3{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)}
+.step-list{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--cream-dark);position:relative}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--green-mist);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.step-content h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.step-content p{font-size:13px;color:var(--text-light)}
+
+/* ============ Cold Brew ============ */
+.coldbrew-layout{display:grid;grid-template-columns:1fr 400px;gap:24px}
+.coldbrew-select{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.cb-tea-card{padding:18px;background:var(--white);border-radius:var(--radius-sm);border:2px solid transparent;cursor:pointer;text-align:center;transition:all var(--transition);box-shadow:var(--shadow-sm)}
+.cb-tea-card:hover{border-color:var(--green-pale)}
+.cb-tea-card.active{border-color:var(--green);background:var(--green-mist)}
+.cb-tea-emoji{font-size:32px;display:block;margin-bottom:8px}
+.cb-tea-name{font-size:15px;font-weight:600;color:var(--text)}
+
+.recipe-card{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.recipe-title{font-family:var(--font-serif);font-size:20px;font-weight:700;color:var(--text);margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--green-mist)}
+.recipe-params{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.recipe-param{padding:14px;background:var(--green-mist);border-radius:var(--radius-sm);text-align:center}
+.recipe-param .rp-value{font-size:20px;font-weight:700;color:var(--green-deep)}
+.recipe-param .rp-label{font-size:12px;color:var(--text-muted);margin-top:2px}
+.recipe-steps{margin-bottom:24px}
+.recipe-steps h4{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px}
+.recipe-step{display:flex;gap:12px;padding:10px 0;font-size:14px;color:var(--text-light);align-items:flex-start}
+.recipe-step-num{width:24px;height:24px;border-radius:50%;background:var(--wood-light);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+.pairings{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pairing-chip{padding:6px 14px;border-radius:16px;font-size:13px;background:var(--cream-dark);color:var(--text);display:flex;align-items:center;gap:4px}
+
+.best-time{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--green-mist);border-radius:var(--radius-sm);font-size:14px;color:var(--green-deep);margin-top:16px}
+
+/* ============ Personalized ============ */
+.personal-layout{display:grid;grid-template-columns:1fr 440px;gap:24px}
+.form-card{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+.form-label .emoji{margin-right:4px}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px}
+.chip-option{padding:8px 16px;border-radius:20px;font-size:13px;background:var(--cream);color:var(--text-light);border:2px solid transparent;cursor:pointer;transition:all var(--transition)}
+.chip-option:hover{border-color:var(--green-pale);color:var(--green)}
+.chip-option.selected{background:var(--green-mist);border-color:var(--green);color:var(--green-deep);font-weight:500}
+.form-submit{width:100%;padding:14px;border-radius:24px;font-size:15px;font-weight:600;background:var(--green);color:#fff;margin-top:8px;transition:all var(--transition)}
+.form-submit:hover{background:var(--green-deep);transform:translateY(-1px)}
+.form-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.result-panel{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.result-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.result-empty-icon{font-size:48px;display:block;margin-bottom:12px}
+.result-tea-card{background:var(--green-mist);border-radius:var(--radius-sm);padding:20px;margin-bottom:16px;border-left:4px solid var(--green)}
+.result-tea-card h4{font-size:16px;color:var(--text);margin-bottom:6px}
+.result-tea-card p{font-size:13px;color:var(--text-light);line-height:1.6}
+.result-reason{margin-top:4px;padding:8px 12px;background:rgba(196,168,130,0.1);border-radius:8px;font-size:13px;color:var(--wood-dark)}
+
+/* ============ Photo Recognition ============ */
+.photo-layout{display:grid;grid-template-columns:1fr 400px;gap:24px}
+.upload-zone{background:linear-gradient(180deg,#FFFFFF 0%,#FCFAF5 100%);border:2px dashed rgba(123,168,130,0.55);border-radius:calc(var(--radius) + 2px);padding:64px 40px;text-align:center;cursor:pointer;transition:border-color var(--transition),background var(--transition),box-shadow var(--transition),transform var(--transition);position:relative}
+.upload-zone:hover{border-color:var(--green);background:linear-gradient(180deg,var(--green-mist),#F7FAF4);box-shadow:0 18px 40px -26px rgba(44,95,58,0.5)}
+.upload-zone.drag-over{border-color:var(--green);background:linear-gradient(180deg,var(--green-mist),#F7FAF4);transform:scale(1.01);box-shadow:0 18px 40px -24px rgba(44,95,58,0.5)}
+.upload-icon{font-size:56px;display:block;margin-bottom:16px;filter:drop-shadow(0 10px 16px rgba(74,124,89,0.22))}
+.upload-text{font-size:16px;color:var(--text);font-weight:500;margin-bottom:4px}
+.upload-hint{font-size:13px;color:var(--text-muted)}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-preview{margin-top:20px}
+.upload-preview img{max-height:240px;border-radius:var(--radius-sm);margin:0 auto}
+
+.recognition-result{background:var(--white);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.result-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.result-tea-icon{font-size:40px;width:64px;height:64px;background:radial-gradient(circle at 32% 28%,#fff,var(--green-mist));border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 #fff,0 8px 18px -12px rgba(44,95,58,0.6)}
+.result-confidence{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-light);margin-top:6px}
+.conf-bar{width:80px;height:7px;background:var(--cream-dark);border-radius:4px;overflow:hidden}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--green-light),var(--green));border-radius:4px;transition:width 0.6s ease}
+.local-notice{background:rgba(196,168,130,0.14);color:var(--wood-dark);font-size:12px;line-height:1.6;padding:10px 12px;border-radius:var(--radius-xs);margin-bottom:16px;border:1px solid rgba(196,168,130,0.22)}
+.api-note{font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:8px}
+.tea-chip{font-size:12px;padding:4px 10px;border-radius:12px;background:var(--white);border:1px solid var(--green-pale);color:var(--text-light);cursor:pointer}
+.tea-chip:hover{border-color:var(--green);color:var(--green)}
+.result-desc{font-size:14px;color:var(--text-light);line-height:1.7;margin-bottom:16px}
+.result-brew{background:var(--green-mist);border-radius:var(--radius-sm);padding:16px;margin-top:12px}
+.result-brew h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+
+/* ============ Modals ============ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease;backdrop-filter:blur(4px)}
+.modal{background:linear-gradient(180deg,#fff,#FCFAF6);border-radius:calc(var(--radius) + 2px);padding:34px;max-width:500px;width:90%;box-shadow:var(--shadow-lg);animation:slideUp 0.3s ease;border:1px solid var(--line)}
+.modal h3{font-family:var(--font-serif);font-size:20px;margin-bottom:12px;color:var(--text)}
+.modal p{font-size:14px;color:var(--text-light);margin-bottom:20px;line-height:1.6}
+
+/* ============ Disclaimer ============ */
+.disclaimer-bar{background:rgba(196,168,130,0.12);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--text-muted);display:flex;align-items:flex-start;gap:8px;margin-top:20px;line-height:1.5}
+
+/* ============ Toast ============ */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:rgba(44,62,45,0.94);color:#fff;padding:13px 26px;border-radius:26px;font-size:14px;z-index:300;animation:slideUp 0.3s ease;box-shadow:var(--shadow-lg);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12)}
+
+/* ============ Timer Notification ============ */
+.timer-done{text-align:center;padding:20px;animation:pulse 1s ease-in-out 3}
+.timer-done .done-icon{font-size:48px;display:block;margin-bottom:8px}
+
+/* ============ Timer Decoration ============ */
+.timer-decoration{margin-top:24px}
+.timer-deco-divider{width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--green-pale),transparent);margin:0 auto 16px}
+.timer-deco-title{font-family:var(--font-serif);font-size:14px;color:var(--text);margin-bottom:14px;letter-spacing:1px}
+.timer-deco-tips{display:flex;flex-direction:column;gap:10px}
+.timer-tip-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--green-mist);border-radius:10px;font-size:13px;color:var(--text-light);transition:all var(--transition)}
+.timer-tip-row:hover{background:var(--green-pale);transform:translateX(4px)}
+.timer-tip-icon{font-size:16px;flex-shrink:0}
+.timer-tip-row.tea-specific{background:linear-gradient(135deg,var(--green-mist),rgba(196,168,130,0.1));border-left:3px solid var(--green)}
+.timer-tip-row.tea-specific .timer-tip-icon{font-size:18px}
+.timer-tea-quote{margin-top:14px;padding:10px 14px;background:rgba(196,168,130,0.08);border-radius:10px;font-family:var(--font-serif);font-size:13px;color:var(--wood-dark);font-style:italic;text-align:center;line-height:1.6}
+.timer-steam-row{display:flex;justify-content:center;gap:12px;margin-top:8px;height:20px;overflow:hidden}
+.timer-steam{font-size:18px;opacity:0;animation:steamFloat 2s ease-in-out infinite}
+.timer-steam:nth-child(2){animation-delay:0.6s;font-size:22px}
+.timer-steam:nth-child(3){animation-delay:1.2s;font-size:20px}
+.timer-steam:nth-child(4){animation-delay:0.3s;font-size:16px}
+.timer-steam:nth-child(5){animation-delay:0.9s;font-size:24px}
+@keyframes steamFloat{0%{opacity:0;transform:translateY(0)}30%{opacity:0.35}70%{opacity:0.35}100%{opacity:0;transform:translateY(-14px)}}
+
+/* ============ Responsive ============ */
+@media(max-width:1024px){
+  .encyclopedia-layout{grid-template-columns:1fr;height:auto}
+  .brewing-layout{grid-template-columns:1fr}
+  .coldbrew-layout{grid-template-columns:1fr}
+  .personal-layout{grid-template-columns:1fr}
+  .photo-layout{grid-template-columns:1fr}
+  .chat-panel{max-height:500px}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .page{padding:20px 16px}
+  .home-hero{padding:32px 24px}
+  .hero-title{font-size:26px}
+  .hero-tea-icon{font-size:80px;right:16px}
+  .daily-tea{flex-direction:column;text-align:center}
+  .quick-actions{grid-template-columns:repeat(2,1fr)}
+  .section-title{font-size:22px}
+  .mobile-nav-toggle{display:flex!important}
+  .timer-display{width:140px;height:140px}
+  .timer-time{font-size:32px}
+}
+@media(max-width:480px){
+  .quick-actions{grid-template-columns:1fr}
+  .params-grid{grid-template-columns:1fr}
+  .tea-select-grid{grid-template-columns:repeat(2,1fr)}
+  .category-bar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:8px}
+}
+
+.mobile-nav-toggle{display:none;position:fixed;top:16px;left:16px;z-index:150;width:40px;height:40px;border-radius:10px;background:var(--white);box-shadow:var(--shadow);align-items:center;justify-content:center;font-size:20px}
+
+/* ============ Processing Animation ============ */
+.processing{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;gap:12px}
+.processing-dots{display:flex;gap:6px}
+.processing-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.2s ease-in-out infinite}
+.processing-dot:nth-child(2){animation-delay:0.2s}
+.processing-dot:nth-child(3){animation-delay:0.4s}
+/* ============ Visual Polish ============ */
+.tea-quote,.params-card,.timer-card,.form-card,.recipe-card,.chat-panel,.result-panel{border:1px solid var(--line)}
+.cat-chip,.suggested-chip,.tea-chip,.chip-option{transition:background var(--transition),color var(--transition),border-color var(--transition),box-shadow var(--transition),transform var(--transition)}
+.cat-chip.active{box-shadow:0 8px 18px -10px rgba(44,95,58,0.7)}
+.chip-option.selected{box-shadow:inset 0 1px 0 #fff,0 4px 12px -8px rgba(44,95,58,0.6)}
+.chat-input:focus{box-shadow:0 0 0 4px rgba(74,124,89,0.10)}
+.step-num,.recipe-step-num{box-shadow:inset 0 1px 0 rgba(255,255,255,0.7)}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+@media(max-width:1180px){
+  .hero-tea-icon{width:112px;height:112px;font-size:60px;right:28px}
+  .hero-content{max-width:calc(100% - 150px)}
+}
+@media(max-width:768px){
+  .hero-content{max-width:100%}
+  .hero-tea-icon{width:150px;height:150px;font-size:80px;right:-12px;top:-12px;transform:none;opacity:0.12;background:none;box-shadow:none;animation:none;z-index:0}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
+}
+/* ============ Drinking Timing ============ */
+.timing-now{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;padding:18px 22px;margin-bottom:20px;border-radius:var(--radius);color:#fff;box-shadow:var(--shadow);
+  background:linear-gradient(135deg,#2E5B3C 0%,#47775A 68%,#548A63 100%)}
+.timing-now::after{content:'🍵';position:absolute;right:16px;bottom:-24px;font-size:96px;opacity:0.12;pointer-events:none}
+.timing-now-icon{font-size:28px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.timing-now-text{position:relative;z-index:1}
+.timing-now-text strong{display:block;font-family:var(--font-serif);font-size:17px;letter-spacing:0.4px;margin-bottom:2px}
+.timing-now-text span{font-size:13px;opacity:0.84;line-height:1.5}
+.timing-tabs{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+.timing-tab{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:118px;padding:11px 15px;border-radius:14px;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow-xs);color:var(--text-light);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition),background var(--transition)}
+.timing-tab:hover{border-color:var(--green-pale);transform:translateY(-2px);box-shadow:var(--shadow)}
+.timing-tab.active{background:linear-gradient(135deg,var(--green-mist),#F5FAF2);border-color:var(--green);color:var(--green-deep);box-shadow:0 12px 24px -16px rgba(44,95,58,0.85)}
+.timing-tab .tt-name{font-size:13.5px;font-weight:600;white-space:nowrap}
+.timing-tab .tt-time{font-size:11px;color:var(--text-muted)}
+.timing-panel{background:var(--white);border:1px solid var(--line);border-radius:calc(var(--radius) + 2px);padding:28px;box-shadow:var(--shadow);margin-bottom:30px}
+.timing-panel-head{display:flex;gap:16px;align-items:flex-start;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.timing-panel-icon{width:54px;height:54px;flex-shrink:0;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;background:radial-gradient(circle at 32% 28%,#fff,var(--green-mist));box-shadow:inset 0 1px 0 #fff,0 8px 18px -12px rgba(44,95,58,0.55)}
+.timing-panel-title{font-family:var(--font-serif);font-size:19px;color:var(--text);margin-bottom:4px}
+.timing-panel-desc{font-size:13.5px;color:var(--text-light);line-height:1.7}
+.timing-avoid{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.6;color:#8A5A3B;background:rgba(196,168,130,0.14);border:1px solid rgba(196,168,130,0.28);padding:9px 12px;border-radius:10px;margin-bottom:18px}
+.timing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
+.timing-tea-card{border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px;background:linear-gradient(180deg,#fff,#FCFAF5);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition)}
+.timing-tea-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--green-pale)}
+.timing-tea-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.timing-tea-emoji{width:42px;height:42px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;background:radial-gradient(circle at 32% 28%,#fff,var(--green-mist));box-shadow:inset 0 1px 0 #fff}
+.timing-tea-name{font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--text)}
+.timing-tea-meta{font-size:11.5px;color:var(--text-muted)}
+.timing-tea-brew{font-size:12.5px;color:var(--text-light);background:var(--green-mist);border-radius:9px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
+.timing-tea-actions{display:flex;gap:8px}
+.timing-tea-actions .btn{flex:1;padding:8px 0;font-size:12.5px;border-radius:10px;box-shadow:none}
+.timing-calendar{margin-bottom:16px;padding:18px 22px;border-radius:var(--radius);border:1px solid var(--line);background:linear-gradient(180deg,#fff,#FBF8F1);box-shadow:var(--shadow-sm)}
+.tc-top{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.tc-clock-wrap{display:flex;flex-direction:column;line-height:1}
+.tc-time{font-family:var(--font-serif);font-size:34px;font-weight:700;color:var(--green-deep);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.tc-zone{font-size:11px;letter-spacing:1.2px;color:var(--text-muted);margin-top:7px}
+.tc-info{flex:1;min-width:220px}
+.tc-date{font-family:var(--font-serif);font-size:15px;font-weight:600;color:var(--text);margin-bottom:9px}
+.tc-tags{display:flex;gap:8px;flex-wrap:wrap}
+.tc-tag{font-size:12px;padding:5px 11px;border-radius:999px;background:var(--green-mist);color:var(--green-deep);border:1px solid rgba(71,119,90,0.18)}
+.tc-tag-season{background:rgba(196,168,130,0.16);color:#8A5A3B;border-color:rgba(196,168,130,0.3)}
+.tc-today{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.tc-today-label{flex-shrink:0;font-size:11.5px;letter-spacing:1px;color:#fff;padding:4px 11px;border-radius:999px;background:linear-gradient(135deg,var(--green),var(--green-deep))}
+.tc-today-text{font-size:13px;color:var(--text-light);line-height:1.6}
+.tc-today-chips{display:flex;gap:6px;flex-wrap:wrap}
+.timing-follow{margin-left:auto;flex-shrink:0;padding:6px 14px;font-size:12px;border-radius:999px;color:#fff;border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.14);transition:background var(--transition),transform var(--transition)}
+.timing-follow:hover{background:rgba(255,255,255,0.26);transform:translateY(-1px)}
+.season-now{display:inline-block;margin-left:6px;font-size:10.5px;letter-spacing:0.5px;color:#fff;background:var(--green);padding:2px 7px;border-radius:999px;vertical-align:middle}
+.timing-subtitle{font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px}
+.season-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:14px;margin-bottom:20px}
+.season-card{padding:18px;border-radius:var(--radius-sm);background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow-xs);cursor:pointer;transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition),background var(--transition)}
+.season-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--green-pale)}
+.season-card.active{border-color:var(--green);background:linear-gradient(180deg,var(--green-mist),#F8FBF6);box-shadow:0 14px 28px -20px rgba(44,95,58,0.9)}
+.season-card h4{font-family:var(--font-serif);font-size:15px;color:var(--text);margin-bottom:2px}
+.season-key{font-size:12px;color:var(--green);margin-bottom:8px;letter-spacing:0.5px}
+.season-card p{font-size:12.5px;color:var(--text-light);line-height:1.65;margin-bottom:10px}
+.season-teas{display:flex;flex-wrap:wrap;gap:6px}
+@media(max-width:768px){
+  .timing-calendar{padding:15px 16px}
+  .tc-top{gap:14px}
+  .tc-time{font-size:28px}
+  .tc-info{min-width:0}
+  .timing-now{padding:16px 18px;flex-wrap:wrap}
+  .timing-follow{margin-left:0;width:100%}
+  .timing-panel{padding:20px}
+  .timing-panel-icon{width:46px;height:46px;font-size:22px}
+  .timing-panel-title{font-size:17px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Mobile Nav Toggle ============ -->
+<button class="mobile-nav-toggle" onclick="toggleSidebar()" aria-label="Menu">🍵</button>
+
+<!-- ============ Sidebar ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🍃</div>
+      <div class="sidebar-logo-text">
+        <h1>茗语</h1>
+        <span>MING AI · 你的AI茶艺师</span>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="navigateTo('home')" data-page="home">
+      <span class="nav-icon">🏠</span> 首页
+    </button>
+    <button class="nav-item" onclick="navigateTo('encyclopedia')" data-page="encyclopedia">
+      <span class="nav-icon">📖</span> AI 茶百科
+    </button>
+    <button class="nav-item" onclick="navigateTo('brewing')" data-page="brewing">
+      <span class="nav-icon">🫖</span> 智能泡茶助手
+      <span class="nav-badge">热门</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('coldbrew')" data-page="coldbrew">
+      <span class="nav-icon">🧊</span> AI 冷萃茶助手
+    </button>
+    <button class="nav-item" onclick="navigateTo('personal')" data-page="personal">
+      <span class="nav-icon">💚</span> 个性化饮茶建议
+    </button>
+    <button class="nav-item" onclick="navigateTo('timing')" data-page="timing">
+      <span class="nav-icon">⏰</span> 饮茶时刻
+      <span class="nav-badge">新</span>
+    </button>
+    <button class="nav-item" onclick="navigateTo('photo')" data-page="photo">
+      <span class="nav-icon">📸</span> AI 拍照识茶
+      <span class="nav-badge">新</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div>茗语 Ming AI v1.0</div>
+    <div class="disclaimer">AI 创新大赛作品</div>
+  </div>
+</aside>
+
+<!-- ============ Main Content ============ -->
+<main class="main" id="main-content">
+
+<!-- ===== Home Page ===== -->
+<section class="page active" id="page-home">
+  <div class="home-hero">
+    <div class="hero-content">
+      <div class="hero-greeting" id="hero-greeting">下午好</div>
+      <h2 class="hero-title">以茶会友，<br>AI 知茶更懂你</h2>
+      <p class="hero-subtitle">我是茗语，你的专属 AI 茶艺师。基于深厚的茶文化知识库，为你提供专业的茶叶知识、冲泡指导和个性化饮茶建议。无论你是茶道新手还是资深茶客，我都愿陪你品味每一杯好茶。</p>
+    </div>
+    <div class="hero-tea-icon">🍵</div>
+  </div>
+
+  <div class="daily-tea" id="daily-tea">
+    <div class="daily-tea-badge" id="daily-tea-emoji">🍃</div>
+    <div class="daily-tea-info">
+      <div class="daily-tea-label">✨ 今日推荐茶饮</div>
+      <div class="daily-tea-name" id="daily-tea-name">龙井</div>
+      <div class="daily-tea-desc" id="daily-tea-desc">春日鲜爽，豆香馥郁，正是品饮龙井的好时节</div>
+      <div class="daily-tea-tags">
+        <span class="tag">绿茶</span>
+        <span class="tag">适合春季</span>
+        <span class="tag">提神醒脑</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-family:var(--font-serif);font-size:18px;margin-bottom:16px;color:var(--text)">快速体验</h3>
+  <div class="quick-actions">
+    <div class="action-card" onclick="navigateTo('encyclopedia')">
+      <span class="action-card-icon">📖</span>
+      <div class="action-card-title">AI 茶百科</div>
+      <div class="action-card-desc">探索六大茶类的奥秘，向 AI 茶艺师提问</div>
+      <span class="action-card-arrow">→</span>
+    </div>
+    <div class="action-card" onclick="navigateTo('brewing')">
+      <span class="action-card-icon">🫖</span>
+      <div class="action-card-title">智能泡茶助手</div>
+      <div class="action-card-desc">精准冲泡参数 + 可视化倒计时</div>
+      <span class="action-card-arrow">→</span>
+    </div>
+    <div class="action-card" onclick="navigateTo('coldbrew')">
+      <span class="action-card-icon">🧊</span>
+      <div class="action-card-title">冷萃茶助手</div>
+      <div class="action-card-desc">夏日冷萃方案，搭配水果花草风味</div>
+      <span class="action-card-arrow">→</span>
+    </div>
+    <div class="action-card" onclick="navigateTo('personal')">
+      <span class="action-card-icon">💚</span>
+      <div class="action-card-title">个性化建议</div>
+      <div class="action-card-desc">根据身体状况、季节、口味智能推荐</div>
+      <span class="action-card-arrow">→</span>
+    </div>
+    <div class="action-card" onclick="navigateTo('photo')">
+      <span class="action-card-icon">📸</span>
+      <div class="action-card-title">拍照识茶</div>
+      <div class="action-card-desc">上传茶叶照片，AI 智能识别茶种</div>
+      <span class="action-card-arrow">→</span>
+    </div>
+  </div>
+
+  <div class="tea-quote">
+    <div class="tea-quote-text">"茶之为饮，发乎神农氏，闻于鲁周公。一碗喉吻润，二碗破孤闷，三碗搜枯肠，惟有文字五千卷。"</div>
+    <div class="tea-quote-author">— 陆羽《茶经》· 卢仝《七碗茶诗》</div>
+  </div>
+</section>
+
+<!-- ===== Tea Encyclopedia ===== -->
+<section class="page" id="page-encyclopedia">
+  <div class="section-header">
+    <h2 class="section-title">📖 AI 茶百科</h2>
+    <p class="section-desc">基于茶文化知识库，AI 茶艺师为你解答关于茶的一切</p>
+  </div>
+  <div class="encyclopedia-layout">
+    <div>
+      <div class="category-bar" id="category-bar"></div>
+      <div class="tea-grid" id="tea-grid"></div>
+    </div>
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-avatar">🍃</div>
+        <div class="chat-header-text">
+          <h3>茗语 · AI 茶艺师</h3>
+          <span>在线 · 随时为你解答</span>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg ai">
+          你好！我是茗语，你的 AI 茶艺师 ☕<br><br>
+          左侧是六大茶类的茶叶库，你可以点击浏览，也可以在下方直接向我提问：<br>
+          • 茶叶的历史、产地、工艺<br>
+          • 六大茶类的区别与特点<br>
+          • 香气、口感、功效、适宜人群<br>
+          • 冲泡技巧和注意事项<br><br>
+          试试问我吧～
+          <div class="msg-time">刚刚</div>
+        </div>
+      </div>
+      <div class="suggested-questions" id="suggested-questions"></div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chat-input" placeholder="输入你的茶问题..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="chat-send" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+  <div class="disclaimer-bar">
+    <span>💡</span> AI 回答基于茶文化知识库生成，仅供参考学习，不替代专业书籍和权威资料。
+  </div>
+</section>
+
+<!-- ===== Brewing Assistant ===== -->
+<section class="page" id="page-brewing">
+  <div class="section-header">
+    <h2 class="section-title">🫖 智能泡茶助手</h2>
+    <p class="section-desc">选择茶叶，AI 茶艺师为你推荐最佳冲泡方案，还有可视化倒计时陪伴</p>
+  </div>
+  <div class="brewing-layout">
+    <div>
+      <div class="brewing-selector">
+        <h3>请选择茶叶种类</h3>
+        <div class="tea-select-grid" id="brewing-tea-grid"></div>
+      </div>
+      <div class="params-card" id="brewing-params" style="display:none">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)">📋 AI 推荐冲泡参数</h3>
+        <div class="params-grid">
+          <div class="param-item"><div class="param-icon">🌡️</div><div class="param-value" id="param-temp">85°C</div><div class="param-label">水温</div></div>
+          <div class="param-item"><div class="param-icon">⚖️</div><div class="param-value" id="param-amount">3g</div><div class="param-label">投茶量</div></div>
+          <div class="param-item"><div class="param-icon">⏱️</div><div class="param-value" id="param-time">2分钟</div><div class="param-label">浸泡时间</div></div>
+          <div class="param-item"><div class="param-icon">🫖</div><div class="param-value" id="param-vessel">玻璃杯</div><div class="param-label">推荐茶具</div></div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:var(--text-muted);text-align:center">
+          可冲泡 <strong id="param-infusions">3</strong> 次
+        </div>
+      </div>
+      <div class="brewing-steps" id="brewing-steps" style="display:none">
+        <h3>🍃 冲泡步骤指引</h3>
+        <div class="step-list" id="step-list"></div>
+      </div>
+      <div class="disclaimer-bar">
+        <span>💡</span> 冲泡参数为 AI 基于茶文化知识推荐，可根据个人口味微调。不同水质、海拔也可能影响最佳参数。
+      </div>
+    </div>
+    <div>
+      <div class="timer-card" id="timer-card">
+        <div style="font-family:var(--font-serif);font-size:16px;color:var(--text);margin-bottom:20px">⏳ 泡茶倒计时</div>
+        <div class="timer-display" id="timer-display">
+          <div class="timer-ring" id="timer-ring"></div>
+          <div class="timer-time" id="timer-time">00:00</div>
+          <div class="timer-label" id="timer-status">准备就绪</div>
+        </div>
+        <div class="timer-controls">
+          <button class="btn btn-outline" onclick="resetTimer()" id="btn-reset">重置</button>
+          <button class="btn btn-primary" onclick="toggleTimer()" id="btn-start">开始计时</button>
+        </div>
+        <div id="timer-notification"></div>
+        <!-- 计时器下方装饰 -->
+        <div class="timer-decoration" id="timer-decoration">
+          <div class="timer-deco-divider"></div>
+          <div class="timer-deco-title">🍃 冲泡小贴士</div>
+          <div class="timer-deco-tips" id="timer-deco-tips">
+            <div class="timer-tip-row">
+              <span class="timer-tip-icon">💧</span>
+              <span>好茶配好水，建议使用山泉水或纯净水</span>
+            </div>
+            <div class="timer-tip-row">
+              <span class="timer-tip-icon">🌡️</span>
+              <span>冲泡前先用热水温杯，锁住茶香</span>
+            </div>
+            <div class="timer-tip-row">
+              <span class="timer-tip-icon">⏱️</span>
+              <span>每泡适当延长5-10秒，滋味层次更丰富</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Cold Brew ===== -->
+<section class="page" id="page-coldbrew">
+  <div class="section-header">
+    <h2 class="section-title">🧊 AI 冷萃茶助手</h2>
+    <p class="section-desc">不同茶叶的冷萃方案，搭配水果花草风味，打造你的专属冷饮</p>
+  </div>
+  <div class="coldbrew-layout">
+    <div>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)">选择冷萃茶种</h3>
+      <div class="coldbrew-select" id="coldbrew-tea-grid"></div>
+      <div id="coldbrew-recipe" style="display:none">
+        <div class="recipe-card">
+          <div class="recipe-title" id="cb-recipe-title">🍃 龙井冷萃方案</div>
+          <div class="recipe-params">
+            <div class="recipe-param"><div class="rp-value" id="cb-ratio">1:50</div><div class="rp-label">茶水比例</div></div>
+            <div class="recipe-param"><div class="rp-value" id="cb-time">6-8小时</div><div class="rp-label">冷藏时间</div></div>
+            <div class="recipe-param"><div class="rp-value" id="cb-temp">4°C</div><div class="rp-label">冷藏温度</div></div>
+            <div class="recipe-param"><div class="rp-value" id="cb-best">24小时内</div><div class="rp-label">最佳饮用期</div></div>
+          </div>
+          <div class="recipe-steps">
+            <h4>📝 制作步骤</h4>
+            <div id="cb-steps"></div>
+          </div>
+          <h4 style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">🍓 推荐搭配</h4>
+          <div class="pairings" id="cb-pairings"></div>
+          <div class="best-time" id="cb-best-time">
+            <span>⏰</span> <span id="cb-best-text">建议早晨开始制作，下午即可享用</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)">
+        <h3 style="font-family:var(--font-serif);font-size:18px;color:var(--text);margin-bottom:16px">💡 冷萃小贴士</h3>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:24px;flex-shrink:0">💧</span>
+            <div>
+              <h4 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">水质很重要</h4>
+              <p style="font-size:13px;color:var(--text-light)">建议使用纯净水或矿泉水，水质直接影响冷萃茶的口感纯净度</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:24px;flex-shrink:0">🌿</span>
+            <div>
+              <h4 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">茶叶选择</h4>
+              <p style="font-size:13px;color:var(--text-light)">绿茶、白茶、轻发酵乌龙茶最适合冷萃；普洱等后发酵茶冷萃别有风味</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:24px;flex-shrink:0">🍯</span>
+            <div>
+              <h4 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">风味升级</h4>
+              <p style="font-size:13px;color:var(--text-light)">加入蜂蜜、柠檬片、薄荷叶或桂花，让冷萃茶更有层次感</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:24px;flex-shrink:0">⚠️</span>
+            <div>
+              <h4 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">注意卫生</h4>
+              <p style="font-size:13px;color:var(--text-light)">冷萃过程中容器和工具需保持洁净，制作完成后冷藏保存，24小时内饮用完毕</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Personalized Recommendations ===== -->
+<section class="page" id="page-personal">
+  <div class="section-header">
+    <h2 class="section-title">💚 个性化饮茶建议</h2>
+    <p class="section-desc">告诉 AI 茶艺师你的状态，获得量身定制的茶饮推荐</p>
+  </div>
+  <div class="personal-layout">
+    <div class="form-card">
+      <div class="form-group">
+        <label class="form-label">🫀 身体状况</label>
+        <div class="chip-group" id="chip-health">
+          <button class="chip-option" data-value="normal">感觉良好</button>
+          <button class="chip-option" data-value="tired">最近熬夜/疲劳</button>
+          <button class="chip-option" data-value="stomach">胃不舒服</button>
+          <button class="chip-option" data-value="heat">上火/燥热</button>
+          <button class="chip-option" data-value="cold">感冒/受寒</button>
+          <button class="chip-option" data-value="diet">饮食油腻</button>
+          <button class="chip-option" data-value="stress">压力大/焦虑</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🌸 季节</label>
+        <div class="chip-group" id="chip-season">
+          <button class="chip-option" data-value="spring">春 · 万物复苏</button>
+          <button class="chip-option" data-value="summer">夏 · 骄阳似火</button>
+          <button class="chip-option" data-value="autumn">秋 · 天高气爽</button>
+          <button class="chip-option" data-value="winter">冬 · 寒气袭人</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🌤️ 天气</label>
+        <div class="chip-group" id="chip-weather">
+          <button class="chip-option" data-value="hot">炎热 (>30°C)</button>
+          <button class="chip-option" data-value="warm">温暖 (20-30°C)</button>
+          <button class="chip-option" data-value="cool">凉爽 (10-20°C)</button>
+          <button class="chip-option" data-value="cold">寒冷 (<10°C)</button>
+          <button class="chip-option" data-value="rain">阴雨天</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🕐 时间</label>
+        <div class="chip-group" id="chip-time">
+          <button class="chip-option" data-value="morning">早晨 (6-9点)</button>
+          <button class="chip-option" data-value="forenoon">上午 (9-12点)</button>
+          <button class="chip-option" data-value="afternoon">下午 (12-18点)</button>
+          <button class="chip-option" data-value="evening">晚上 (18-22点)</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">👅 口味偏好</label>
+        <div class="chip-group" id="chip-taste">
+          <button class="chip-option" data-value="floral">花香型</button>
+          <button class="chip-option" data-value="fruity">果香型</button>
+          <button class="chip-option" data-value="sweet">清甜型</button>
+          <button class="chip-option" data-value="rich">醇厚型</button>
+          <button class="chip-option" data-value="fresh">清爽型</button>
+          <button class="chip-option" data-value="roasted">焙火香</button>
+          <button class="chip-option" data-value="aged">陈香型</button>
+        </div>
+      </div>
+      <button class="form-submit" onclick="getPersonalRecommendation()" id="btn-recommend">
+        🍵 让 AI 茶艺师为我推荐
+      </button>
+    </div>
+    <div>
+      <div class="result-panel" id="personal-result">
+        <div class="result-empty">
+          <span class="result-empty-icon">🍃</span>
+          <p>在左侧选择你的状态和偏好<br>AI 茶艺师将为你推荐合适的茶饮</p>
+        </div>
+      </div>
+      <div class="disclaimer-bar" style="margin-top:16px">
+        <span>⚠️</span>
+        <span><strong>饮茶建议仅供日常参考，不替代医疗建议。</strong>如有特殊健康状况或正在服药，请咨询专业医生。</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Drinking Timing ===== -->
+<section class="page" id="page-timing">
+  <div class="section-header">
+    <h2 class="section-title">⏰ 饮茶时刻</h2>
+    <p class="section-desc">读取今天的真实日期与时间，告诉你此刻、以及当前季节适合喝什么茶</p>
+  </div>
+
+  <div class="timing-calendar" id="timing-calendar"></div>
+  <div class="timing-now" id="timing-now"></div>
+  <div class="timing-tabs" id="timing-tabs"></div>
+  <div class="timing-panel" id="timing-panel"></div>
+
+  <h3 class="timing-subtitle">📅 今天是什么季节，该喝什么</h3>
+  <div class="season-grid" id="season-grid"></div>
+
+  <div class="disclaimer-bar">
+    <span>⚠️</span>
+    <span><strong>时段与季节建议仅供参考。</strong>咖啡因敏感、失眠、胃病、孕期或正在服药者，请按自身情况调整，必要时咨询医生。</span>
+  </div>
+</section>
+
+<!-- ===== Photo Recognition ===== -->
+<section class="page" id="page-photo">
+  <div class="section-header">
+    <h2 class="section-title">📸 AI 拍照识茶</h2>
+    <p class="section-desc">上传干茶照片，由视觉大模型识别茶种、说明判断依据并推荐冲泡方案</p>
+  </div>
+  <div class="photo-layout">
+    <div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('photo-input').click()">
+        <div id="upload-content">
+          <span class="upload-icon">📷</span>
+          <div class="upload-text">点击上传茶叶照片</div>
+          <div class="upload-hint">支持 JPG、PNG，建议干茶平铺在白纸上、从正上方拍摄</div>
+        </div>
+        <div id="upload-processing" class="processing" style="display:none">
+          <span style="font-size:40px">🔍</span>
+          <p style="font-size:14px;color:var(--text-light)">AI 正在识别茶叶...</p>
+          <div class="processing-dots">
+            <div class="processing-dot"></div><div class="processing-dot"></div><div class="processing-dot"></div>
+          </div>
+        </div>
+        <input type="file" class="upload-input" id="photo-input" accept="image/*" onchange="handlePhotoUpload(event)">
+      </div>
+      <div class="upload-preview" id="upload-preview"></div>
+      <div style="margin-top:16px;text-align:center">
+        <button class="btn btn-ghost" onclick="simulateRecognition()" style="font-size:13px">
+          🔬 本地近似识别（不调用模型，仅判断茶类）
+        </button>
+      </div>
+    </div>
+    <div>
+      <div class="recognition-result" id="recognition-result">
+        <div class="result-empty">
+          <span class="result-empty-icon">🔬</span>
+          <p>上传茶叶照片后<br>AI 将在这显示识别结果</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ Modal ============ -->
+<div class="modal-overlay" id="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-content" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- ============ Toast ============ -->
+<div class="toast" id="toast" style="display:none"></div>
+
+<script>
+// ==================== TEA KNOWLEDGE BASE ====================
+const teaDatabase = {
+  categories: [
+    { id: 'all', name: '全部', emoji: '🍵' },
+    { id: 'green', name: '绿茶', emoji: '🍃', color: '#7BA882' },
+    { id: 'black', name: '红茶', emoji: '☕', color: '#C4744A' },
+    { id: 'oolong', name: '乌龙茶', emoji: '🏔️', color: '#C4A882' },
+    { id: 'white', name: '白茶', emoji: '🪶', color: '#D4C8A8' },
+    { id: 'yellow', name: '黄茶', emoji: '🌼', color: '#D4B896' },
+    { id: 'dark', name: '黑茶', emoji: '🪵', color: '#8B6914' }
+  ],
+  teas: [
+    {
+      id: 'longjing', name: '龙井', category: 'green', emoji: '🍃',
+      origin: '浙江杭州西湖', aroma: '豆香、栗香', taste: '鲜爽甘醇',
+      desc: '龙井茶是中国十大名茶之首，产于浙江杭州西湖区，以色绿、香郁、味甘、形美四绝著称。清明节前采摘的"明前龙井"品质最佳。',
+      history: '龙井茶始于唐代，扬名于宋，盛于清。乾隆皇帝六下江南，四次到龙井茶区，御封"十八棵御茶"。',
+      process: '采摘→摊放→杀青→回潮→辉锅→分筛→收灰',
+      health: '提神醒脑、抗氧化、降脂减肥、清热利尿',
+      suitable: '上班族、脑力劳动者、需要提神的人群',
+      cautions: '空腹不宜饮用；脾胃虚寒者适量；孕妇及经期女性少饮',
+      brewing: { temp: '80-85°C', amount: '3g', time: '2-3分钟', vessel: '玻璃杯', infusions: 3 },
+      coldbrew: { ratio: '1:50', time: '4-6小时', temp: '4°C', best: '12小时内',
+        pairings: ['🍋 柠檬片', '🌿 薄荷叶', '🍯 蜂蜜', '🌸 桂花'],
+        steps: ['取3g龙井茶叶放入冷泡瓶', '加入150ml常温纯净水', '放入冰箱冷藏4-6小时', '取出滤去茶叶即可饮用', '可加入蜂蜜或柠檬片调味'] }
+    },
+    {
+      id: 'biluochun', name: '碧螺春', category: 'green', emoji: '🌿',
+      origin: '江苏苏州太湖', aroma: '花果香', taste: '鲜醇回甘',
+      desc: '碧螺春产于江苏苏州太湖洞庭山，外形卷曲如螺，白毫显露，色泽银绿隐翠。冲泡后白云翻滚，清香袭人。',
+      history: '碧螺春原名"吓煞人香"，康熙皇帝南巡时品饮后赐名"碧螺春"，从此成为贡茶。',
+      process: '采摘→杀青→揉捻→搓团显毫→烘干',
+      health: '提神益思、消炎杀菌、利尿解毒、保护牙齿',
+      suitable: '办公室人群、应酬较多者、需要清新口气的人群',
+      cautions: '水温不宜过高（不超过85°C），否则苦涩；空腹少饮',
+      brewing: { temp: '80°C', amount: '3g', time: '1-2分钟', vessel: '玻璃杯', infusions: 3 },
+      coldbrew: { ratio: '1:50', time: '4-5小时', temp: '4°C', best: '12小时内',
+        pairings: ['🍑 水蜜桃', '🌹 玫瑰花', '🍯 蜂蜜'],
+        steps: ['取3g碧螺春放入冷泡瓶', '加入150ml冷水', '冷藏4-5小时', '滤出茶汤，加入水蜜桃片风味更佳'] }
+    },
+    {
+      id: 'huangshanmaofeng', name: '黄山毛峰', category: 'green', emoji: '⛰️',
+      origin: '安徽黄山', aroma: '兰花香、栗香', taste: '鲜浓醇厚',
+      desc: '黄山毛峰产于安徽黄山，外形微卷如雀舌，芽尖峰芒，白毫披身。特级黄山毛峰"金黄片"、"象牙色"特征明显。',
+      brewing: { temp: '85°C', amount: '3g', time: '2-3分钟', vessel: '玻璃杯', infusions: 3 },
+      suitable: '追求高品质生活的人群、需要抗氧化抗衰老的人',
+      cautions: '冲泡水温不宜过高；不宜久泡',
+      health: '抗氧化、延缓衰老、降血压、防辐射',
+      coldbrew: { ratio: '1:50', time: '5-6小时', temp: '4°C', best: '12小时内',
+        pairings: ['🍊 橙片', '🌿 迷迭香'],
+        steps: ['取3g黄山毛峰放入容器', '加150ml冷水', '冷藏5-6小时', '滤出后加入橙片装饰'] }
+    },
+    {
+      id: 'zhenshanxiaozhong', name: '正山小种', category: 'black', emoji: '🔥',
+      origin: '福建武夷山', aroma: '松烟香、桂圆香', taste: '醇厚甘甜',
+      desc: '正山小种是世界红茶的鼻祖，产于福建武夷山桐木关。传统工艺用松针或松柴熏制，具有独特的松烟香和桂圆汤味。',
+      history: '正山小种创制于明末清初，17世纪传入欧洲，成为英国皇室下午茶的经典用茶，开启了世界红茶文化。',
+      process: '萎凋→揉捻→发酵→过红锅→复揉→熏焙→复火',
+      health: '暖胃养胃、促进消化、提神消疲、舒张血管',
+      suitable: '胃寒怕冷者、冬季饮用、中老年人',
+      cautions: '新茶火气较重，建议存放一段时间再饮；易上火者适量',
+      brewing: { temp: '90-95°C', amount: '5g', time: '3-5分钟', vessel: '紫砂壶/盖碗', infusions: 5 },
+      coldbrew: { ratio: '1:40', time: '8-10小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍎 苹果干', '🫚 肉桂', '🍊 陈皮', '🍯 黑糖'],
+        steps: ['取5g正山小种放入冷泡瓶', '加200ml冷水', '冷藏8-10小时', '滤出茶汤，加入肉桂棒增加层次感'] }
+    },
+    {
+      id: 'jinjunmei', name: '金骏眉', category: 'black', emoji: '✨',
+      origin: '福建武夷山', aroma: '花果蜜香', taste: '甘甜润滑',
+      desc: '金骏眉是红茶中的极品，全部以芽头制作，每500g金骏眉需6-8万颗芽头。汤色金黄透亮，滋味鲜活甘爽。',
+      brewing: { temp: '85-90°C', amount: '3g', time: '2-3分钟', vessel: '盖碗/白瓷杯', infusions: 6 },
+      suitable: '追求品质的茶客、商务人士、送礼佳品',
+      cautions: '价格昂贵，市面仿品较多需甄别；水温不宜过高',
+      health: '暖胃、抗氧化、提神、美容养颜',
+      coldbrew: { ratio: '1:40', time: '6-8小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍓 草莓', '🌺 洛神花'],
+        steps: ['取2g金骏眉放入冷泡瓶', '加80ml冷水', '冷藏6-8小时', '茶汤金黄透亮，搭配草莓片清新可口'] }
+    },
+    {
+      id: 'qimenhongcha', name: '祁门红茶', category: 'black', emoji: '☕',
+      origin: '安徽祁门', aroma: '祁门香（似花似果似蜜）', taste: '醇和鲜爽',
+      desc: '祁门红茶是世界三大高香红茶之一，以"祁门香"闻名于世。条索紧细匀整，色泽乌润，汤色红艳明亮。',
+      brewing: { temp: '90-95°C', amount: '4g', time: '3-4分钟', vessel: '瓷壶/盖碗', infusions: 4 },
+      suitable: '下午茶爱好者、女性群体、需要暖胃的人',
+      cautions: '新茶建议存放3-6个月再饮风味更佳',
+      health: '暖胃驱寒、提神消疲、生津清热、抗氧化',
+      coldbrew: { ratio: '1:45', time: '6-8小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍑 蜜桃', '🍋 柠檬', '🌹 玫瑰花瓣'],
+        steps: ['取4g祁红放入冷泡瓶', '加180ml冷水', '冷藏6-8小时', '加入蜜桃片和玫瑰花瓣，花香果香交融'] }
+    },
+    {
+      id: 'tieguanyin', name: '铁观音', category: 'oolong', emoji: '🍂',
+      origin: '福建安溪', aroma: '兰花香、观音韵', taste: '醇厚甘鲜',
+      desc: '铁观音是中国十大名茶之一，属于闽南乌龙茶，有"七泡有余香"之誉。分为清香型、浓香型和陈香型。',
+      history: '铁观音创制于清雍正年间，至今已有近300年历史。"铁观音"既是茶名也是茶树品种名。',
+      process: '采摘→晒青→凉青→做青→炒青→揉捻→初烘→包揉→复烘→烘干',
+      health: '抗衰老、降脂减肥、提神益思、清热降火',
+      suitable: '饮食油腻者、减肥人群、需要提神的学生和上班族',
+      cautions: '空腹不宜；晚上不宜多饮（含咖啡碱）；清香型铁观音需冷藏保存',
+      brewing: { temp: '95-100°C', amount: '7g', time: '30-60秒(快出汤)', vessel: '盖碗/紫砂壶', infusions: 7 },
+      coldbrew: { ratio: '1:40', time: '8-12小时', temp: '4°C', best: '24小时内',
+        pairings: ['🌸 桂花', '🍑 白桃', '🫒 青柠'],
+        steps: ['取7g铁观音放入冷泡瓶', '加280ml冷水', '冷藏8-12小时', '兰花香融入水中，加入青柠片清爽怡人'] }
+    },
+    {
+      id: 'dahongpao', name: '大红袍', category: 'oolong', emoji: '🪨',
+      origin: '福建武夷山', aroma: '岩骨花香', taste: '醇厚回甘',
+      desc: '大红袍是武夷岩茶之王，产于武夷山天心岩九龙窠。具有独特的"岩韵"，香气馥郁持久，"七泡八泡有余香，九泡十泡余味存"。',
+      brewing: { temp: '100°C', amount: '8g', time: '30-60秒(快出汤)', vessel: '紫砂壶/盖碗', infusions: 8 },
+      suitable: '资深茶客、商务宴请、需要暖胃驱寒的人',
+      cautions: '新茶火气较重，建议存放退火后再饮',
+      health: '暖胃驱寒、消食解腻、降血脂、抗衰老',
+      coldbrew: { ratio: '1:35', time: '10-12小时', temp: '4°C', best: '24小时内',
+        pairings: ['🫚 姜片', '🍯 蜂蜜'],
+        steps: ['取8g大红袍放入冷泡瓶', '加280ml冷水', '冷藏10-12小时', '岩韵冷萃别有风味，加少许蜂蜜调和'] }
+    },
+    {
+      id: 'fenghuangdancong', name: '凤凰单丛', category: 'oolong', emoji: '🌺',
+      origin: '广东潮州凤凰山', aroma: '花香型（多种香型）', taste: '浓醇鲜爽',
+      desc: '凤凰单丛产于广东潮州凤凰山，以"形美、色翠、香郁、味甘"著称。因香气类型丰富，有"茶中香水"的美誉，常见有蜜兰香、鸭屎香等。',
+      brewing: { temp: '95-100°C', amount: '7g', time: '20-40秒(快出汤)', vessel: '盖碗/潮州手拉壶', infusions: 10 },
+      suitable: '追求香气体验的茶客、潮汕工夫茶爱好者',
+      cautions: '投茶量大，不宜空腹饮用',
+      health: '提神醒脑、消食去腻、降脂减肥',
+      coldbrew: { ratio: '1:35', time: '10-12小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍍 菠萝', '🥭 芒果', '🌿 香茅'],
+        steps: ['取7g凤凰单丛放入冷泡瓶', '加245ml冷水', '冷藏10-12小时', '花香释放充分，加入热带水果风味激爽'] }
+    },
+    {
+      id: 'baihaoyinzhen', name: '白毫银针', category: 'white', emoji: '🪶',
+      origin: '福建福鼎/政和', aroma: '毫香、花香', taste: '清甜鲜爽',
+      desc: '白毫银针是白茶中的极品，全部以肥壮芽头制作，满披白毫，色白如银。制作工艺最自然，不炒不揉，最大程度保留了茶叶的天然成分。',
+      brewing: { temp: '85-90°C', amount: '3g', time: '3-5分钟', vessel: '玻璃杯/盖碗', infusions: 4 },
+      suitable: '注重养生的人群、上火体质、办公室白领',
+      cautions: '白茶性寒凉，脾胃虚寒者适量',
+      health: '清热润肺、解毒消炎、降血压、美容抗衰',
+      coldbrew: { ratio: '1:50', time: '6-8小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍐 雪梨', '🌸 桂花', '🍯 蜂蜜'],
+        steps: ['取3g白毫银针放入冷泡瓶', '加150ml冷水', '冷藏6-8小时', '银针冷萃清甜如泉，加入雪梨片更清润'] }
+    },
+    {
+      id: 'baimudan', name: '白牡丹', category: 'white', emoji: '🌸',
+      origin: '福建福鼎', aroma: '花香清雅', taste: '醇和甘甜',
+      desc: '白牡丹以一芽一二叶为原料，绿叶夹银白毫心，冲泡后形似牡丹花朵而得名。是白茶中性价比较高的品类。',
+      brewing: { temp: '90°C', amount: '4g', time: '3-4分钟', vessel: '盖碗/玻璃杯', infusions: 4 },
+      suitable: '日常养生、女性群体、追求自然口感的人',
+      cautions: '新白茶性偏寒，陈放1-2年后更温和',
+      health: '清热降火、明目护肝、抗氧化、三降（降糖降脂降压）',
+      coldbrew: { ratio: '1:45', time: '5-7小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍈 蜜瓜', '🌼 洋甘菊'],
+        steps: ['取4g白牡丹放入冷泡瓶', '加180ml冷水', '冷藏5-7小时', '搭配蜜瓜片，清甜加倍'] }
+    },
+    {
+      id: 'junshanyinzhen', name: '君山银针', category: 'yellow', emoji: '🌼',
+      origin: '湖南岳阳君山岛', aroma: '清雅悠长', taste: '甘醇甜爽',
+      desc: '君山银针是中国十大名茶之一，产于湖南岳阳洞庭湖君山岛。全由芽头制成，冲泡时芽尖冲向水面，悬空竖立，如"万笔书天"。',
+      history: '君山银针始于唐代，清朝时被列为贡茶。1956年国际莱比锡博览会上获金质奖章。',
+      process: '杀青→摊放→初烘→摊放→初包→复烘→摊放→复包→干燥',
+      health: '消食化积、提神醒脑、抗氧化、促进新陈代谢',
+      suitable: '消化不良者、追求品质生活的人',
+      cautions: '黄茶产量稀少，市面较少见；水温不宜过高',
+      brewing: { temp: '85°C', amount: '3g', time: '3-4分钟', vessel: '玻璃杯(观赏茶舞)', infusions: 3 },
+      coldbrew: { ratio: '1:50', time: '5-6小时', temp: '4°C', best: '12小时内',
+        pairings: ['🍐 雪梨', '🌿 薄荷'],
+        steps: ['取3g君山银针放入冷泡瓶', '加150ml冷水', '冷藏5-6小时', '搭配雪梨薄荷清新怡人'] }
+    },
+    {
+      id: 'puer_sheng', name: '普洱生茶', category: 'dark', emoji: '🪨',
+      origin: '云南西双版纳/临沧', aroma: '花香、蜜香（新茶）→陈香（老茶）', taste: '苦涩回甘→醇厚甘滑',
+      desc: '普洱生茶以云南大叶种晒青毛茶为原料，经蒸压成型。新茶性寒，随时间陈化，茶性渐转温和，越陈越香。',
+      brewing: { temp: '95-100°C', amount: '8g', time: '10-30秒(快出汤)', vessel: '紫砂壶/盖碗', infusions: 10 },
+      suitable: '资深茶客、需要消食解腻的人、收藏爱好者',
+      cautions: '新茶性寒，胃寒者少饮；老茶温和可常饮',
+      health: '消食解腻、降脂减肥、降三高、抗氧化',
+      coldbrew: { ratio: '1:40(老生茶更佳)', time: '8-12小时', temp: '4°C', best: '24小时内',
+        pairings: ['🍊 陈皮', '🌸 菊花'],
+        steps: ['取8g老生普放入冷泡瓶', '加320ml冷水', '冷藏8-12小时', '加陈皮一起冷萃，滋味层次丰富'] }
+    },
+    {
+      id: 'puer_shu', name: '普洱熟茶', category: 'dark', emoji: '🪵',
+      origin: '云南', aroma: '陈香、枣香、糯香', taste: '醇厚顺滑',
+      desc: '普洱熟茶是1973年后发展出的工艺，通过渥堆发酵加速陈化。汤色红浓明亮，滋味醇和顺滑。',
+      brewing: { temp: '100°C', amount: '8g', time: '20-40秒(快出汤)', vessel: '紫砂壶/盖碗', infusions: 10 },
+      suitable: '胃寒者、中老年人、日常品饮',
+      cautions: '选择正规厂家产品（渥堆工艺需卫生把控）',
+      health: '暖胃养胃、降脂减肥、助眠安神（咖啡碱含量较低）',
+      coldbrew: { ratio: '1:35', time: '8-10小时', temp: '4°C', best: '24小时内',
+        pairings: ['🫚 红枣', '🍊 陈皮', '🫘 桂圆'],
+        steps: ['取8g熟普放入冷泡瓶', '加280ml冷水', '冷藏8-10小时', '搭配红枣片，口感温润甘甜'] }
+    },
+    {
+      id: 'liubaocha', name: '六堡茶', category: 'dark', emoji: '🧱',
+      origin: '广西梧州', aroma: '槟榔香、陈香', taste: '醇和甘爽',
+      desc: '六堡茶是广西梧州特产，以"红、浓、陈、醇"四绝著称。传统工艺中独特的"渥堆"和"窖藏"赋予其独特的陈香和槟榔香。',
+      brewing: { temp: '100°C', amount: '8g', time: '20-40秒', vessel: '紫砂壶/坭兴陶壶', infusions: 10 },
+      suitable: '湿气重地区人群、需要祛湿调理的人、中老年人',
+      cautions: '新制六堡茶建议存放一段时间再饮',
+      health: '祛湿排毒、暖胃养胃、降脂减肥、调节肠道',
+      coldbrew: { ratio: '1:35', time: '8-10小时', temp: '4°C', best: '24小时内',
+        pairings: ['🫚 姜片', '🍂 桂皮'],
+        steps: ['取8g六堡茶放入冷泡瓶', '加280ml冷水', '冷藏8-10小时', '加入桂皮棒，祛湿暖身'] }
+    }
+  ]
+};
+
+// Recommendation matrix
+const recommendMatrix = {
+  health: {
+    tired: ['longjing', 'biluochun', 'jinjunmei'],
+    stomach: ['puer_shu', 'zhenshanxiaozhong', 'qimenhongcha'],
+    heat: ['longjing', 'baihaoyinzhen', 'baimudan', 'biluochun'],
+    cold: ['zhenshanxiaozhong', 'jinjunmei', 'qimenhongcha', 'puer_shu'],
+    diet: ['tieguanyin', 'dahongpao', 'puer_sheng', 'puer_shu'],
+    stress: ['baihaoyinzhen', 'baimudan', 'longjing', 'fenghuangdancong'],
+    normal: ['longjing', 'tieguanyin', 'baimudan', 'qimenhongcha']
+  },
+  season: {
+    spring: ['longjing', 'biluochun', 'huangshanmaofeng', 'baimudan'],
+    summer: ['longjing', 'biluochun', 'baihaoyinzhen', 'tieguanyin'],
+    autumn: ['tieguanyin', 'fenghuangdancong', 'qimenhongcha', 'dahongpao'],
+    winter: ['zhenshanxiaozhong', 'jinjunmei', 'puer_shu', 'dahongpao', 'qimenhongcha']
+  },
+  weather: {
+    hot: ['longjing', 'biluochun', 'baihaoyinzhen', 'baimudan'],
+    warm: ['longjing', 'baimudan', 'tieguanyin', 'huangshanmaofeng'],
+    cool: ['tieguanyin', 'fenghuangdancong', 'qimenhongcha', 'dahongpao'],
+    cold: ['zhenshanxiaozhong', 'jinjunmei', 'puer_shu', 'dahongpao'],
+    rain: ['puer_shu', 'zhenshanxiaozhong', 'liubaocha', 'qimenhongcha']
+  },
+  time: {
+    morning: ['longjing', 'biluochun', 'huangshanmaofeng'],
+    forenoon: ['longjing', 'tieguanyin', 'baimudan'],
+    afternoon: ['tieguanyin', 'fenghuangdancong', 'dahongpao', 'qimenhongcha'],
+    evening: ['puer_shu', 'baimudan', 'baihaoyinzhen', 'zhenshanxiaozhong']
+  },
+  taste: {
+    floral: ['tieguanyin', 'fenghuangdancong', 'biluochun', 'baimudan'],
+    fruity: ['jinjunmei', 'qimenhongcha', 'fenghuangdancong'],
+    sweet: ['baihaoyinzhen', 'baimudan', 'jinjunmei', 'longjing'],
+    rich: ['dahongpao', 'puer_shu', 'zhenshanxiaozhong', 'puer_sheng'],
+    fresh: ['longjing', 'biluochun', 'huangshanmaofeng', 'baihaoyinzhen'],
+    roasted: ['dahongpao', 'zhenshanxiaozhong'],
+    aged: ['puer_sheng', 'puer_shu', 'liubaocha']
+  }
+};
+
+// ==================== DRINKING TIMING ====================
+const timingGuide = [
+  { id: 'dawn', name: '清晨', time: '5:00–9:00', icon: '🌅', hours: [5, 9],
+    title: '唤醒身体，温和开场',
+    advice: '刚起床肠胃还空，宜温热、清淡。红茶或老白茶温和不刺激，比空腹喝浓绿茶更舒服。',
+    teas: ['zhenshanxiaozhong', 'baihaoyinzhen', 'puer_shu'],
+    avoid: '避免空腹喝浓绿茶、生普等刺激性较强的茶' },
+  { id: 'morning', name: '上午', time: '9:00–12:00', icon: '☀️', hours: [9, 12],
+    title: '头脑清醒的黄金时段',
+    advice: '工作学习效率高峰，绿茶和轻发酵乌龙最提神。龙井清鲜、铁观音回甘，适合需要专注的时候。',
+    teas: ['longjing', 'biluochun', 'tieguanyin'],
+    avoid: '胃酸偏多的人少喝过浓的绿茶' },
+  { id: 'noon', name: '午间', time: '12:00–14:00', icon: '🍚', hours: [12, 14],
+    title: '饭后半小时再喝',
+    advice: '饭后立刻大量饮茶会冲淡胃液，建议餐后 30 分钟。乌龙与黑茶助消化、解油腻，是午餐后的好搭档。',
+    teas: ['tieguanyin', 'puer_shu', 'dahongpao'],
+    avoid: '不要饭后立刻喝浓茶，也避免与补铁食物同时饮用' },
+  { id: 'afternoon', name: '午后', time: '14:00–17:00', icon: '🌤️', hours: [14, 17],
+    title: '对抗下午的困倦',
+    advice: '下午容易犯困、口干，适合香气高扬的乌龙和红茶；需要提神可选焙火乌龙，香气足、耐泡。',
+    teas: ['fenghuangdancong', 'qimenhongcha', 'dahongpao'],
+    avoid: '临近日落少喝高咖啡因的浓茶' },
+  { id: 'evening', name: '傍晚', time: '17:00–20:00', icon: '🌇', hours: [17, 20],
+    title: '温和收尾，别再刺激',
+    advice: '晚餐后宜温和、低刺激。熟普与老白茶温润护胃，适合饭后消食，也不容易影响睡眠。',
+    teas: ['puer_shu', 'liubaocha', 'baimudan'],
+    avoid: '空腹或太晚不要喝浓茶' },
+  { id: 'night', name: '睡前', time: '20:00 以后', icon: '🌙', hours: [20, 24],
+    title: '想睡好，就别喝浓茶',
+    advice: '睡前 2 小时尽量避免咖啡因。实在想喝，选低咖啡因的老白茶或淡泡熟普，量少、泡淡。',
+    teas: ['baimudan', 'baihaoyinzhen'],
+    avoid: '睡前 2 小时内避免浓绿茶、生普和高香乌龙' }
+];
+
+const seasonGuide = [
+  { id: 'spring', name: '春', icon: '🌸', term: '自立春起', key: '疏肝理气 · 尝鲜',
+    note: '新绿茶上市，清香鲜爽；花茶可疏解春困，宜淡饮。',
+    teas: ['longjing', 'biluochun', 'huangshanmaofeng'] },
+  { id: 'summer', name: '夏', icon: '🌿', term: '自立夏起', key: '清热生津 · 解暑',
+    note: '绿茶、白茶性凉，清热生津；冷萃或温饮都适合，别贪冰。',
+    teas: ['longjing', 'baihaoyinzhen', 'biluochun'] },
+  { id: 'autumn', name: '秋', icon: '🍂', term: '自立秋起', key: '润燥养肺 · 平补',
+    note: '乌龙茶性平，润燥不寒；老白茶可煮饮，缓解秋燥。',
+    teas: ['tieguanyin', 'fenghuangdancong', 'baimudan'] },
+  { id: 'winter', name: '冬', icon: '❄️', term: '自立冬起', key: '温阳暖身 · 暖胃',
+    note: '红茶、熟普性温，暖身养胃；可煮饮，配陈皮更佳。',
+    teas: ['zhenshanxiaozhong', 'puer_shu', 'jinjunmei'] }
+];
+
+let timingSlot = null;
+let timingSeason = null;
+let timingFollowSlot = true;
+let timingFollowSeason = true;
+let timingLastSlot = null;
+let timingLastSeason = null;
+let timingClockTimer = null;
+
+function getTeaById(id) {
+  return teaDatabase.teas.find(t => t.id === id);
+}
+
+// 以北京时间（Asia/Shanghai）为准，避免设备时区或系统时钟偏差导致时段判断错误
+const BEIJING_FMT = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai', hourCycle: 'h23',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'long'
+});
+
+function getBeijingNow() {
+  const map = {};
+  BEIJING_FMT.formatToParts(new Date()).forEach(p => {
+    if (p.type !== 'literal') map[p.type] = p.value;
+  });
+  return {
+    year: +map.year,
+    month: +map.month,
+    day: +map.day,
+    hour: +map.hour % 24,
+    minute: +map.minute,
+    second: +map.second,
+    weekday: map.weekday || ''
+  };
+}
+
+const pad2 = n => String(n).padStart(2, '0');
+
+function currentTimingSlot() {
+  const h = getBeijingNow().hour;
+  if (h < 5) return 'night';
+  const slot = timingGuide.find(s => h >= s.hours[0] && h < s.hours[1]);
+  return slot ? slot.id : 'night';
+}
+
+// 按节气近似划分季节：立春 2/4、立夏 5/5、立秋 8/7、立冬 11/7
+function currentSeason() {
+  const { month, day } = getBeijingNow();
+  const md = month * 100 + day;
+  if (md >= 1107 || md < 204) return 'winter';
+  if (md < 505) return 'spring';
+  if (md < 807) return 'summer';
+  return 'autumn';
+}
+
+function initTiming() {
+  timingSlot = currentTimingSlot();
+  timingSeason = currentSeason();
+  timingFollowSlot = true;
+  timingFollowSeason = true;
+  timingLastSlot = timingSlot;
+  timingLastSeason = timingSeason;
+  renderTiming();
+  startTimingClock();
+}
+
+function startTimingClock() {
+  stopTimingClock();
+  timingClockTimer = setInterval(tickTiming, 1000);
+}
+
+function stopTimingClock() {
+  if (timingClockTimer) {
+    clearInterval(timingClockTimer);
+    timingClockTimer = null;
+  }
+}
+
+function tickTiming() {
+  const now = getBeijingNow();
+  const clock = document.getElementById('tc-time');
+  if (clock) clock.textContent = `${pad2(now.hour)}:${pad2(now.minute)}:${pad2(now.second)}`;
+
+  const slotNow = currentTimingSlot();
+  const seasonNow = currentSeason();
+  let needRender = false;
+
+  if (slotNow !== timingLastSlot) {
+    if (timingFollowSlot) timingSlot = slotNow;
+    timingLastSlot = slotNow;
+    needRender = true;
+  }
+  if (seasonNow !== timingLastSeason) {
+    if (timingFollowSeason) timingSeason = seasonNow;
+    timingLastSeason = seasonNow;
+    needRender = true;
+  }
+  if (needRender) renderTiming();
+}
+
+function setTimingSlot(id) {
+  timingSlot = id;
+  timingFollowSlot = id === currentTimingSlot();
+  renderTiming();
+}
+
+function setTimingSeason(id) {
+  timingSeason = id;
+  timingFollowSeason = id === currentSeason();
+  renderTiming();
+}
+
+function timingTeaCard(id) {
+  const tea = getTeaById(id);
+  if (!tea) return '';
+  const cat = teaDatabase.categories.find(c => c.id === tea.category);
+  return `
+    <div class="timing-tea-card">
+      <div class="timing-tea-head">
+        <span class="timing-tea-emoji">${tea.emoji}</span>
+        <div>
+          <div class="timing-tea-name">${tea.name}</div>
+          <div class="timing-tea-meta">${cat ? cat.name : ''}${tea.origin ? ' · ' + tea.origin : ''}</div>
+        </div>
+      </div>
+      <div class="timing-tea-brew">🌡️ ${tea.brewing?.temp || '—'} · ⚖️ ${tea.brewing?.amount || '—'} · ⏱️ ${tea.brewing?.time || '—'}</div>
+      <div class="timing-tea-actions">
+        <button class="btn btn-primary" onclick="navigateTo('brewing');selectBrewingTea('${tea.id}')">去冲泡</button>
+        <button class="btn btn-outline" onclick="navigateTo('encyclopedia');selectTeaForChat('${tea.id}')">了解</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderTiming() {
+  const tabs = document.getElementById('timing-tabs');
+  if (!tabs) return;
+
+  const nowId = currentTimingSlot();
+  const todaySeasonId = currentSeason();
+  const slot = timingGuide.find(s => s.id === timingSlot) || timingGuide[0];
+  const liveSlot = timingGuide.find(s => s.id === nowId) || timingGuide[0];
+  const todaySeason = seasonGuide.find(s => s.id === todaySeasonId) || seasonGuide[0];
+  const now = getBeijingNow();
+
+  const cal = document.getElementById('timing-calendar');
+  if (cal) {
+    const todayTeas = todaySeason.teas.map(getTeaById).filter(Boolean);
+    cal.innerHTML = `
+      <div class="tc-top">
+        <div class="tc-clock-wrap">
+          <div class="tc-time" id="tc-time">${pad2(now.hour)}:${pad2(now.minute)}:${pad2(now.second)}</div>
+          <div class="tc-zone">北京时间 · Asia/Shanghai</div>
+        </div>
+        <div class="tc-info">
+          <div class="tc-date">${now.year} 年 ${now.month} 月 ${now.day} 日 · ${now.weekday}</div>
+          <div class="tc-tags">
+            <span class="tc-tag">${liveSlot.icon} 此刻 ${liveSlot.name} ${liveSlot.time}</span>
+            <span class="tc-tag tc-tag-season">${todaySeason.icon} 今天属于${todaySeason.name}季 · ${todaySeason.term}</span>
+          </div>
+        </div>
+      </div>
+      <div class="tc-today">
+        <span class="tc-today-label">今日宜饮</span>
+        <span class="tc-today-text">${todaySeason.name}季${todaySeason.key}</span>
+        <span class="tc-today-chips">${todayTeas.map(t => `<span class="tea-chip" onclick="navigateTo('encyclopedia');selectTeaForChat('${t.id}')">${t.emoji} ${t.name}</span>`).join('')}</span>
+      </div>
+    `;
+  }
+
+  tabs.innerHTML = timingGuide.map(s => `
+    <button class="timing-tab${s.id === timingSlot ? ' active' : ''}" onclick="setTimingSlot('${s.id}')">
+      <span class="tt-name">${s.icon} ${s.name}${s.id === nowId ? ' · 此刻' : ''}</span>
+      <span class="tt-time">${s.time}</span>
+    </button>
+  `).join('');
+
+  const nowBox = document.getElementById('timing-now');
+  if (nowBox) {
+    const teaNames = slot.teas.map(id => getTeaById(id)?.name).filter(Boolean).join(' / ');
+    nowBox.innerHTML = `
+      <span class="timing-now-icon">${slot.icon}</span>
+      <div class="timing-now-text">
+        <strong>${slot.id === nowId ? '此刻是' + slot.name : '正在查看 ' + slot.name} · ${slot.title}</strong>
+        <span>${slot.time}　推荐：${teaNames}</span>
+      </div>
+      ${slot.id === nowId ? '' : `<button class="timing-follow" onclick="setTimingSlot('${nowId}')">回到此刻</button>`}
+    `;
+  }
+
+  document.getElementById('timing-panel').innerHTML = `
+    <div class="timing-panel-head">
+      <div class="timing-panel-icon">${slot.icon}</div>
+      <div>
+        <h3 class="timing-panel-title">${slot.name} · ${slot.title}</h3>
+        <p class="timing-panel-desc">${slot.advice}</p>
+      </div>
+    </div>
+    <div class="timing-avoid">⚠️ <span>${slot.avoid}</span></div>
+    <div class="timing-grid">${slot.teas.map(timingTeaCard).join('')}</div>
+  `;
+
+  document.getElementById('season-grid').innerHTML = seasonGuide.map(s => `
+    <div class="season-card${s.id === timingSeason ? ' active' : ''}" onclick="setTimingSeason('${s.id}')">
+      <h4>${s.icon} ${s.name}季${s.id === todaySeasonId ? '<span class="season-now">今天</span>' : ''}</h4>
+      <div class="season-key">${s.key}</div>
+      <p>${s.note}</p>
+      <div class="season-teas">
+        ${s.teas.map(id => {
+          const tea = getTeaById(id);
+          return tea
+            ? `<span class="tea-chip" onclick="event.stopPropagation();navigateTo('encyclopedia');selectTeaForChat('${tea.id}')">${tea.emoji} ${tea.name}</span>`
+            : '';
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+
+// ==================== STATE ====================
+let currentPage = 'home';
+let selectedCategory = 'all';
+let selectedBrewingTea = null;
+let selectedColdbrewTea = null;
+let timerSeconds = 0;
+let timerInterval = null;
+let timerRunning = false;
+let personalSelections = {};
+let uploadedImageData = null;
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+  updateGreeting();
+  setDailyTea();
+  renderCategories();
+  renderTeaGrid();
+  renderSuggestedQuestions();
+  renderBrewingTeaGrid();
+  renderColdbrewTeaGrid();
+  initChipListeners();
+});
+
+function updateGreeting() {
+  const hour = new Date().getHours();
+  let greeting;
+  if (hour < 9) greeting = '早上好 🌅';
+  else if (hour < 12) greeting = '上午好 ☀️';
+  else if (hour < 14) greeting = '中午好 🌤️';
+  else if (hour < 18) greeting = '下午好 🌿';
+  else greeting = '晚上好 🌙';
+  document.getElementById('hero-greeting').textContent = greeting;
+}
+
+function setDailyTea() {
+  const dailyTeas = ['longjing', 'tieguanyin', 'baihaoyinzhen', 'dahongpao', 'jinjunmei'];
+  const today = new Date().getDate();
+  const teaId = dailyTeas[today % dailyTeas.length];
+  const tea = teaDatabase.teas.find(t => t.id === teaId);
+  if (tea) {
+    document.getElementById('daily-tea-emoji').textContent = tea.emoji;
+    document.getElementById('daily-tea-name').textContent = tea.name;
+    document.getElementById('daily-tea-desc').textContent = tea.desc.slice(0, 50) + '...';
+    const catName = teaDatabase.categories.find(c => c.id === tea.category)?.name || '';
+    document.querySelector('#daily-tea .daily-tea-tags').innerHTML = `
+      <span class="tag">${catName}</span>
+      <span class="tag">${tea.suitable?.slice(0, 10) || '日常品饮'}</span>
+      <span class="tag">${tea.origin?.slice(0, 8) || ''}</span>
+    `;
+  }
+}
+
+// ==================== NAVIGATION ====================
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+
+  // Scroll to top
+  document.getElementById('main-content').scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  // Re-initialize specific pages
+  if (page === 'encyclopedia') {
+    renderTeaGrid();
+    scrollChatToBottom();
+  }
+  if (page === 'timing') {
+    initTiming();
+  } else {
+    stopTimingClock();
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ==================== TEA ENCYCLOPEDIA ====================
+function renderCategories() {
+  const bar = document.getElementById('category-bar');
+  bar.innerHTML = teaDatabase.categories.map(cat =>
+    `<button class="cat-chip${cat.id === selectedCategory ? ' active' : ''}"
+             onclick="selectCategory('${cat.id}')">${cat.emoji} ${cat.name}</button>`
+  ).join('');
+}
+
+function selectCategory(catId) {
+  selectedCategory = catId;
+  renderCategories();
+  renderTeaGrid();
+}
+
+function renderTeaGrid() {
+  const grid = document.getElementById('tea-grid');
+  const teas = selectedCategory === 'all'
+    ? teaDatabase.teas
+    : teaDatabase.teas.filter(t => t.category === selectedCategory);
+  grid.innerHTML = teas.map(tea => `
+    <div class="tea-card" onclick="selectTeaForChat('${tea.id}')">
+      <div class="tea-card-emoji">${tea.emoji}</div>
+      <div class="tea-card-name">${tea.name}</div>
+      <div class="tea-card-cat">${teaDatabase.categories.find(c => c.id === tea.category)?.name || ''} · ${tea.origin?.slice(0,6) || ''}</div>
+    </div>
+  `).join('');
+}
+
+function selectTeaForChat(teaId) {
+  const tea = teaDatabase.teas.find(t => t.id === teaId);
+  if (!tea) return;
+
+  // Visual selection
+  document.querySelectorAll('.tea-card').forEach(c => c.classList.remove('selected'));
+  const cards = document.querySelectorAll('.tea-card');
+  const index = teaDatabase.teas.findIndex(t => t.id === teaId);
+  if (selectedCategory !== 'all') {
+    const filteredIndex = teaDatabase.teas.filter(t => t.category === selectedCategory).findIndex(t => t.id === teaId);
+    if (cards[filteredIndex]) cards[filteredIndex].classList.add('selected');
+  } else {
+    if (cards[index]) cards[index].classList.add('selected');
+  }
+
+  // Add AI message about the tea
+  const response = generateTeaInfo(tea);
+  addChatMessage('ai', response);
+}
+
+function renderSuggestedQuestions() {
+  const questions = [
+    '六大茶类有什么区别？',
+    '什么茶适合新手入门？',
+    '绿茶为什么不能用沸水泡？',
+    '普洱茶越陈越香是真的吗？',
+    '夏天喝什么茶比较好？'
+  ];
+  document.getElementById('suggested-questions').innerHTML = questions.map(q =>
+    `<button class="suggested-chip" onclick="askSuggested('${q}')">${q}</button>`
+  ).join('');
+}
+
+function askSuggested(question) {
+  document.getElementById('chat-input').value = question;
+  sendMessage();
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addChatMessage('user', text);
+  input.value = '';
+
+  // Simulate AI thinking
+  setTimeout(() => {
+    const response = generateAIResponse(text);
+    addChatMessage('ai', response);
+  }, 800 + Math.random() * 1200);
+}
+
+function addChatMessage(type, content) {
+  const container = document.getElementById('chat-messages');
+  const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const msg = document.createElement('div');
+  msg.className = `chat-msg ${type}`;
+  msg.innerHTML = `${content}<div class="msg-time">${time}</div>`;
+  container.appendChild(msg);
+  scrollChatToBottom();
+}
+
+function scrollChatToBottom() {
+  const container = document.getElementById('chat-messages');
+  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+}
+
+function generateTeaInfo(tea) {
+  return `${tea.emoji} <strong>${tea.name}</strong><br><br>
+📌 <strong>产地：</strong>${tea.origin || '详见知识库'}<br>
+👃 <strong>香气：</strong>${tea.aroma || '详见知识库'}<br>
+👅 <strong>口感：</strong>${tea.taste || '详见知识库'}<br><br>
+📝 <strong>简介：</strong>${tea.desc || ''}<br><br>
+🫖 <strong>冲泡建议：</strong>${tea.brewing ? `${tea.brewing.temp}水温 · ${tea.brewing.amount}投茶量 · ${tea.brewing.time} · ${tea.brewing.vessel} · 可泡${tea.brewing.infusions}次` : '详见冲泡助手'}<br><br>
+💪 <strong>功效：</strong>${tea.health || ''}<br>
+👤 <strong>适宜人群：</strong>${tea.suitable || ''}<br>
+⚠️ <strong>注意事项：</strong>${tea.cautions || ''}<br><br>
+你想了解${tea.name}的哪些方面呢？可以问我关于它的历史、工艺或者不同产区的区别哦～`;
+}
+
+function generateAIResponse(query) {
+  query = query.toLowerCase();
+
+  // Category-related questions
+  if (query.includes('六大茶类') || query.includes('茶类区别') || query.includes('分类')) {
+    return `🍵 <strong>中国六大茶类</strong><br><br>
+茶叶按发酵程度从低到高分为六大类：<br><br>
+🍃 <strong>绿茶：不发酵</strong> — 代表：龙井、碧螺春、黄山毛峰<br>
+性寒，清热提神，适合春夏饮用<br><br>
+🪶 <strong>白茶：微发酵</strong> — 代表：白毫银针、白牡丹<br>
+性寒凉，清热解毒，"一年茶、三年药、七年宝"<br><br>
+🌼 <strong>黄茶：轻发酵</strong> — 代表：君山银针<br>
+性寒，工艺独特（闷黄），产量稀少<br><br>
+🍂 <strong>乌龙茶：半发酵</strong> — 代表：铁观音、大红袍、凤凰单丛<br>
+性平，花香馥郁，七泡有余香<br><br>
+☕ <strong>红茶：全发酵</strong> — 代表：正山小种、金骏眉、祁门红茶<br>
+性温，暖胃养胃，适合秋冬<br><br>
+🪵 <strong>黑茶：后发酵</strong> — 代表：普洱、六堡茶<br>
+性温，消食解腻，越陈越香<br><br>
+💡 选择什么茶，要因人、因时、因地而异。你想深入了解哪一类呢？`;
+  }
+
+  if (query.includes('新手') || query.includes('入门') || query.includes('刚开始')) {
+    return `🌱 <strong>新手喝茶入门指南</strong><br><br>
+我推荐新手从这几种茶开始：<br><br>
+1️⃣ <strong>龙井</strong> 🍃 — 口感鲜爽，香气清新，不易泡苦，用80°C水温即可<br>
+2️⃣ <strong>白牡丹</strong> 🌸 — 味道甘甜柔和，不苦不涩，冷泡热泡都好喝<br>
+3️⃣ <strong>金骏眉</strong> ✨ — 花果蜜香，甘甜润滑，很适合不喜欢苦涩的人<br>
+4️⃣ <strong>铁观音</strong> 🍂 — 兰花香迷人，回甘强烈，体验"观音韵"<br><br>
+📋 <strong>新手建议：</strong><br>
+• 从清淡的茶开始，逐渐尝试浓郁型<br>
+• 注意水温控制，不是所有茶都用沸水<br>
+• 少量购买，多尝试找到自己喜欢的类型<br>
+• 买一个简单的盖碗或玻璃杯就够用了<br><br>
+需要我详细介绍一下某款茶吗？`;
+  }
+
+  if (query.includes('绿茶') && (query.includes('沸水') || query.includes('水温') || query.includes('为什么不能'))) {
+    return `🌡️ <strong>绿茶为什么不能用沸水冲泡？</strong><br><br>
+绿茶是不发酵茶，茶叶中保留了大量的<strong>茶多酚、氨基酸和叶绿素</strong>等活性物质。<br><br>
+⚠️ <strong>沸水（100°C）冲泡绿茶的后果：</strong><br>
+• 茶多酚过度浸出 → 茶汤变苦涩<br>
+• 叶绿素被破坏 → 茶汤变黄<br>
+• 维生素C被破坏 → 营养流失<br>
+• 香气物质瞬间挥发 → 香气散失<br><br>
+✅ <strong>正确温度：</strong><br>
+• 龙井、碧螺春：80-85°C<br>
+• 黄山毛峰：85°C左右<br>
+• 嫩芽绿茶：75-80°C<br><br>
+💡 没有温度计？水烧开后开盖晾2-3分钟，或先倒入公道杯降温再泡～`;
+  }
+
+  if (query.includes('普洱') && (query.includes('越陈越香') || query.includes('陈化'))) {
+    return `📦 <strong>普洱茶真的越陈越香吗？</strong><br><br>
+这个说法<strong>基本正确，但有前提条件</strong>：<br><br>
+✅ <strong>越陈越香的条件：</strong><br>
+• 必须是<strong>优质原料</strong>（好山头、好树龄）<br>
+• 正确的<strong>制作工艺</strong>（晒青毛茶为原料）<br>
+• 合适的<strong>仓储环境</strong>（温度20-30°C，湿度60-75%，通风避光无异味）<br><br>
+📈 <strong>陈化阶段：</strong><br>
+• 1-3年：新茶期，苦涩明显<br>
+• 3-10年：转化期，苦涩减弱，醇厚度上升<br>
+• 10-20年：陈茶期，陈香显现，茶汤如油<br>
+• 20年以上：老茶期，药香、樟香，口感如丝绸<br><br>
+⚠️ <strong>并不是所有普洱都适合久存：</strong><br>
+• 原料差、工艺不当的茶，放久了也不会变好<br>
+• 仓储不当（受潮、异味）会毁掉好茶<br>
+• 熟普陈化空间比生普小很多<br><br>
+所以"越陈越香"是有门槛的——好茶 + 好仓 = 越陈越香 🎯`;
+  }
+
+  if (query.includes('夏天') || query.includes('夏季') || query.includes('热')) {
+    return `☀️ <strong>夏天适合喝什么茶？</strong><br><br>
+夏季炎热，人体容易出汗、上火、食欲不振，推荐以下茶类：<br><br>
+🥇 <strong>绿茶</strong> — 龙井、碧螺春<br>
+性寒清热，消暑降温，提神醒脑<br><br>
+🥈 <strong>白茶</strong> — 白毫银针、白牡丹<br>
+清热解毒，新白茶尤其适合夏天<br><br>
+🥉 <strong>轻发酵乌龙</strong> — 清香型铁观音<br>
+不寒不燥，花香清新，生津止渴<br><br>
+🧊 <strong>冷萃茶</strong> — 以上茶类都可以冷泡<br>
+把茶叶放入冷水中冷藏4-8小时，清凉解暑又健康！<br><br>
+💡 试试我的<strong>冷萃茶助手</strong>功能，为你定制专属夏日冷饮哦～`;
+  }
+
+  // Default: search for matching tea
+  for (const tea of teaDatabase.teas) {
+    if (query.includes(tea.name.toLowerCase())) {
+      return generateTeaInfo(tea);
+    }
+  }
+
+  // Generic response
+  return `感谢你的提问 ☕<br><br>
+关于"${query.slice(0,30)}..."这个问题，让我从茶文化的角度来回答：<br><br>
+📚 中国茶文化博大精深，涉及<strong>产地、工艺、冲泡、品鉴、养生</strong>等多个维度。建议你可以：<br><br>
+• 点击左侧茶叶卡片，了解具体茶类的详细信息<br>
+• 使用<strong>智能泡茶助手</strong>获取专业冲泡指导<br>
+• 通过<strong>个性化建议</strong>找到最适合你的茶<br><br>
+或者你可以换个更具体的问题问我，比如"龙井和碧螺春有什么区别？"或"铁观音适合什么时候喝？" 🍃`;
+}
+
+// ==================== BREWING ASSISTANT ====================
+function renderBrewingTeaGrid() {
+  const grid = document.getElementById('brewing-tea-grid');
+  grid.innerHTML = teaDatabase.teas.map(tea => `
+    <div class="tea-select-card${selectedBrewingTea === tea.id ? ' active' : ''}"
+         onclick="selectBrewingTea('${tea.id}')">
+      <span class="emoji">${tea.emoji}</span>
+      <span class="name">${tea.name}</span>
+      <span class="cat">${teaDatabase.categories.find(c => c.id === tea.category)?.name || ''}</span>
+    </div>
+  `).join('');
+}
+
+function selectBrewingTea(teaId) {
+  selectedBrewingTea = teaId;
+  renderBrewingTeaGrid();
+  resetTimer();
+
+  const tea = teaDatabase.teas.find(t => t.id === teaId);
+  if (!tea || !tea.brewing) return;
+
+  // Show params
+  document.getElementById('brewing-params').style.display = 'block';
+  document.getElementById('brewing-steps').style.display = 'block';
+  document.getElementById('param-temp').textContent = tea.brewing.temp;
+  document.getElementById('param-amount').textContent = tea.brewing.amount;
+  document.getElementById('param-time').textContent = tea.brewing.time;
+  document.getElementById('param-vessel').textContent = tea.brewing.vessel;
+  document.getElementById('param-infusions').textContent = tea.brewing.infusions;
+
+  // Set timer to recommended time (parse minutes)
+  const timeMatch = tea.brewing.time.match(/(\d+)/);
+  if (timeMatch) {
+    const mins = parseInt(timeMatch[1]);
+    timerSeconds = mins * 60;
+    updateTimerDisplay();
+    document.getElementById('timer-status').textContent = `推荐浸泡 ${tea.brewing.time}`;
+  }
+
+  // Render steps
+  const steps = [
+    { title: '温杯洁具', desc: `用沸水烫洗${tea.brewing.vessel}，提升器具温度，激发茶香` },
+    { title: '投茶', desc: `取${tea.brewing.amount}${tea.name}投入${tea.brewing.vessel}中` },
+    { title: '润茶（可选）', desc: `注入少量${tea.brewing.temp}热水，快速润茶后倒掉` },
+    { title: '冲泡', desc: `注入${tea.brewing.temp}热水至${tea.brewing.vessel}七分满，浸泡${tea.brewing.time}` },
+    { title: '出汤品饮', desc: `将茶汤倒入公道杯，分至品茗杯中，趁热闻香品尝` },
+    { title: '续泡', desc: `每次续水适当延长浸泡时间，可冲泡${tea.brewing.infusions}次` }
+  ];
+  document.getElementById('step-list').innerHTML = steps.map((s, i) => `
+    <div class="step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-content">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+      </div>
+    </div>
+  `).join('');
+
+  // Update timer decoration with tea-specific tips
+  updateTimerDecoration(tea);
+
+  // Scroll to timer
+  document.getElementById('timer-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateTimerDecoration(tea) {
+  const deco = document.getElementById('timer-decoration');
+  if (!deco) return;
+  if (!tea) {
+    // Default tips
+    deco.innerHTML = `
+      <div class="timer-deco-divider"></div>
+      <div class="timer-deco-title">🍃 冲泡小贴士</div>
+      <div class="timer-deco-tips">
+        <div class="timer-tip-row"><span class="timer-tip-icon">💧</span><span>好茶配好水，建议使用山泉水或纯净水</span></div>
+        <div class="timer-tip-row"><span class="timer-tip-icon">🌡️</span><span>冲泡前先用热水温杯，锁住茶香</span></div>
+        <div class="timer-tip-row"><span class="timer-tip-icon">⏱️</span><span>每泡适当延长5-10秒，滋味层次更丰富</span></div>
+      </div>
+      <div class="timer-steam-row">
+        <span class="timer-steam">🍃</span><span class="timer-steam">☁️</span><span class="timer-steam">🍃</span><span class="timer-steam">☁️</span><span class="timer-steam">🍃</span>
+      </div>`;
+    return;
+  }
+  const tips = getTeaBrewingTips(tea);
+  deco.innerHTML = `
+    <div class="timer-deco-divider"></div>
+    <div class="timer-deco-title">🍃 ${tea.name} 冲泡小贴士</div>
+    <div class="timer-deco-tips">
+      ${tips.map(tip => `
+        <div class="timer-tip-row tea-specific">
+          <span class="timer-tip-icon">${tip.icon}</span>
+          <span>${tip.text}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="timer-tea-quote">${getTeaQuote(tea)}</div>
+    <div class="timer-steam-row">
+      <span class="timer-steam">🍃</span><span class="timer-steam">☁️</span><span class="timer-steam">${tea.emoji}</span><span class="timer-steam">☁️</span><span class="timer-steam">🍃</span>
+    </div>`;
+}
+
+function getTeaBrewingTips(tea) {
+  const tipsMap = {
+    green: [
+      { icon: '🌡️', text: '水温是关键！80-85°C最适宜，沸水会烫熟茶叶产生苦涩' },
+      { icon: '🫗', text: '建议用玻璃杯冲泡，便于观赏茶叶在水中舒展的优雅姿态' },
+      { icon: '🍃', text: '绿茶不耐泡，前3泡为精华，之后滋味骤降' }
+    ],
+    black: [
+      { icon: '☕', text: '红茶适合用90-95°C高温冲泡，充分释放香气和滋味' },
+      { icon: '🍯', text: '可搭配牛奶或蜂蜜调饮，别有一番风味' },
+      { icon: '🫖', text: '紫砂壶泡红茶效果极佳，能吸附杂味、提升醇厚度' }
+    ],
+    oolong: [
+      { icon: '🔥', text: '乌龙茶需要沸水（100°C）冲泡，才能激发高扬的香气' },
+      { icon: '⚡', text: '快出汤是关键！前三泡10-30秒出汤，避免闷泡过久' },
+      { icon: '👃', text: '冲泡前先闻干茶香，冲泡后闻盖香，层次丰富别有韵味' }
+    ],
+    white: [
+      { icon: '⏳', text: '白茶可适当延长浸泡时间（3-5分钟），滋味更醇和' },
+      { icon: '🌿', text: '新白茶性偏寒，陈放1-2年的老白茶更温和适口' },
+      { icon: '🍵', text: '白毫银针可冲泡4次以上，每泡延长30秒' }
+    ],
+    yellow: [
+      { icon: '🌼', text: '黄茶产量稀少，冲泡时欣赏"茶舞"是一大乐趣' },
+      { icon: '🌡️', text: '水温控制在85°C左右，过高会破坏黄茶特有的闷黄风味' }
+    ],
+    dark: [
+      { icon: '🪨', text: '黑茶/普洱建议用100°C沸水冲泡，充分激发陈香' },
+      { icon: '🔄', text: '第一泡建议快速润茶（洗茶），唤醒沉睡的茶叶' },
+      { icon: '📦', text: '冲泡后将壶盖打开，避免闷蒸影响后续冲泡' }
+    ]
+  };
+  return tipsMap[tea.category] || tipsMap.green;
+}
+
+function getTeaQuote(tea) {
+  const quotes = {
+    longjing: '"院外风荷西子笑，明前龙井女儿红"',
+    biluochun: '"入山无处不飞翠，碧螺春香百里醉"',
+    tieguanyin: '"未尝甘露味，先闻圣妙香"',
+    dahongpao: '"溪边奇茗冠天下，武夷仙人自古栽"',
+    baihaoyinzhen: '"白毫满披，如银似雪；清甜如泉，素雅如兰"',
+    puer_sheng: '"香于九畹芳兰气，圆如三秋皓月轮"',
+    puer_shu: '"红浓明亮似琥珀，醇和顺滑如丝绸"'
+  };
+  return quotes[tea.id] || `"一盏${tea.name}，半日清闲"`;
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  if (timerSeconds <= 0) return;
+  timerRunning = true;
+  document.getElementById('timer-display').classList.add('running');
+  document.getElementById('timer-ring').classList.add('active');
+  document.getElementById('btn-start').textContent = '暂停';
+  document.getElementById('btn-start').className = 'btn btn-outline';
+  document.getElementById('timer-status').textContent = '冲泡中... 🍵';
+
+  const totalSeconds = timerSeconds;
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      timerDone();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('timer-display').classList.remove('running');
+  document.getElementById('timer-ring').classList.remove('active');
+  document.getElementById('btn-start').textContent = '继续计时';
+  document.getElementById('btn-start').className = 'btn btn-primary';
+  document.getElementById('timer-status').textContent = '已暂停';
+}
+
+function resetTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  if (selectedBrewingTea) {
+    const tea = teaDatabase.teas.find(t => t.id === selectedBrewingTea);
+    if (tea && tea.brewing) {
+      const timeMatch = tea.brewing.time.match(/(\d+)/);
+      timerSeconds = timeMatch ? parseInt(timeMatch[1]) * 60 : 120;
+    }
+  }
+  document.getElementById('timer-display').classList.remove('running');
+  document.getElementById('timer-ring').classList.remove('active');
+  document.getElementById('btn-start').textContent = '开始计时';
+  document.getElementById('btn-start').className = 'btn btn-primary';
+  document.getElementById('timer-notification').innerHTML = '';
+  updateTimerDisplay();
+  document.getElementById('timer-status').textContent = selectedBrewingTea ? '准备就绪' : '请先选择茶叶';
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(Math.max(0, timerSeconds) / 60);
+  const secs = Math.max(0, timerSeconds) % 60;
+  document.getElementById('timer-time').textContent =
+    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function timerDone() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-display').classList.remove('running');
+  document.getElementById('timer-ring').classList.remove('active');
+  document.getElementById('btn-start').textContent = '重新计时';
+  document.getElementById('btn-start').className = 'btn btn-primary';
+  document.getElementById('timer-status').textContent = '冲泡完成！';
+  document.getElementById('timer-notification').innerHTML = `
+    <div class="timer-done">
+      <span class="done-icon">🍵</span>
+      <p style="font-size:16px;font-weight:600;color:var(--green)">茶已泡好，请出汤品饮！</p>
+      <p style="font-size:13px;color:var(--text-muted)">趁热品尝，感受茶香～</p>
+    </div>
+  `;
+  showToast('🫖 冲泡完成！请出汤品饮～');
+}
+
+// ==================== COLD BREW ====================
+function renderColdbrewTeaGrid() {
+  const coldbrewTeas = teaDatabase.teas.filter(t => t.coldbrew);
+  const grid = document.getElementById('coldbrew-tea-grid');
+  grid.innerHTML = coldbrewTeas.map(tea => `
+    <div class="cb-tea-card${selectedColdbrewTea === tea.id ? ' active' : ''}"
+         onclick="selectColdbrewTea('${tea.id}')">
+      <span class="cb-tea-emoji">${tea.emoji}</span>
+      <div class="cb-tea-name">${tea.name}</div>
+    </div>
+  `).join('');
+}
+
+function selectColdbrewTea(teaId) {
+  selectedColdbrewTea = teaId;
+  renderColdbrewTeaGrid();
+
+  const tea = teaDatabase.teas.find(t => t.id === teaId);
+  if (!tea || !tea.coldbrew) return;
+
+  const cb = tea.coldbrew;
+  document.getElementById('coldbrew-recipe').style.display = 'block';
+  document.getElementById('cb-recipe-title').textContent = `${tea.emoji} ${tea.name} 冷萃方案`;
+  document.getElementById('cb-ratio').textContent = cb.ratio;
+  document.getElementById('cb-time').textContent = cb.time;
+  document.getElementById('cb-temp').textContent = cb.temp;
+  document.getElementById('cb-best').textContent = cb.best;
+  document.getElementById('cb-best-text').textContent = `建议早晨开始制作，${cb.time.replace('小时','')}小时后即可享用`;
+
+  document.getElementById('cb-steps').innerHTML = cb.steps.map((s, i) => `
+    <div class="recipe-step">
+      <div class="recipe-step-num">${i + 1}</div>
+      <span>${s}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('cb-pairings').innerHTML = cb.pairings.map(p =>
+    `<span class="pairing-chip">${p}</span>`
+  ).join('');
+
+  document.getElementById('coldbrew-recipe').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ==================== PERSONALIZED RECOMMENDATIONS ====================
+function initChipListeners() {
+  document.querySelectorAll('.chip-group').forEach(group => {
+    group.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('chip-option')) return;
+      const groupId = group.id.replace('chip-', '');
+      // Single select for all groups
+      group.querySelectorAll('.chip-option').forEach(c => c.classList.remove('selected'));
+      e.target.classList.add('selected');
+      personalSelections[groupId] = e.target.dataset.value;
+    });
+  });
+}
+
+function getPersonalRecommendation() {
+  const btn = document.getElementById('btn-recommend');
+  const selections = { ...personalSelections };
+
+  // Check if enough selections made
+  const selectedCount = Object.values(selections).length;
+  if (selectedCount < 2) {
+    showToast('请至少选择2个维度的信息哦～');
+    return;
+  }
+
+  // Disable button during processing
+  btn.disabled = true;
+  btn.textContent = '🍃 AI 正在分析中...';
+
+  setTimeout(() => {
+    const recommendations = generateRecommendations(selections);
+    renderRecommendations(recommendations, selections);
+    btn.disabled = false;
+    btn.textContent = '🍵 让 AI 茶艺师为我推荐';
+  }, 1500);
+}
+
+function generateRecommendations(selections) {
+  const scores = {};
+  teaDatabase.teas.forEach(t => { scores[t.id] = 0; });
+
+  if (selections.health && recommendMatrix.health[selections.health]) {
+    recommendMatrix.health[selections.health].forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (3 - i * 0.5);
+    });
+  }
+  if (selections.season && recommendMatrix.season[selections.season]) {
+    recommendMatrix.season[selections.season].forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (3 - i * 0.5);
+    });
+  }
+  if (selections.weather && recommendMatrix.weather[selections.weather]) {
+    recommendMatrix.weather[selections.weather].forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (3 - i * 0.5);
+    });
+  }
+  if (selections.time && recommendMatrix.time[selections.time]) {
+    recommendMatrix.time[selections.time].forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (2 - i * 0.5);
+    });
+  }
+  if (selections.taste && recommendMatrix.taste[selections.taste]) {
+    recommendMatrix.taste[selections.taste].forEach((id, i) => {
+      scores[id] = (scores[id] || 0) + (2 - i * 0.5);
+    });
+  }
+
+  // Sort by score
+  const ranked = Object.entries(scores)
+    .filter(([_, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  return ranked.map(([id, score]) => {
+    const tea = teaDatabase.teas.find(t => t.id === id);
+    return { tea, score, reasons: getReasons(tea, selections) };
+  });
+}
+
+function getReasons(tea, selections) {
+  const reasons = [];
+  if (selections.health && recommendMatrix.health[selections.health]?.includes(tea.id)) {
+    const healthMap = { tired: '缓解疲劳', stomach: '温和养胃', heat: '清热去火', cold: '驱寒暖身', diet: '消食解腻', stress: '舒缓压力', normal: '日常保健' };
+    reasons.push(`针对${healthMap[selections.health] || '身体状况'}有良好效果`);
+  }
+  if (selections.season && recommendMatrix.season[selections.season]?.includes(tea.id)) {
+    const seasonMap = { spring: '春季', summer: '夏季', autumn: '秋季', winter: '冬季' };
+    reasons.push(`非常适合${seasonMap[selections.season]}饮用`);
+  }
+  if (selections.weather && recommendMatrix.weather[selections.weather]?.includes(tea.id)) {
+    const weatherMap = { hot: '炎热天气', warm: '温暖天气', cool: '凉爽天气', cold: '寒冷天气', rain: '阴雨天气' };
+    reasons.push(`适合${weatherMap[selections.weather]}`);
+  }
+  if (selections.taste && recommendMatrix.taste[selections.taste]?.includes(tea.id)) {
+    const tasteMap = { floral: '花香', fruity: '果香', sweet: '清甜', rich: '醇厚', fresh: '清爽', roasted: '焙火香', aged: '陈香' };
+    reasons.push(`符合你对${tasteMap[selections.taste]}的偏好`);
+  }
+  if (selections.time && recommendMatrix.time[selections.time]?.includes(tea.id)) {
+    const timeMap = { morning: '早晨', forenoon: '上午', afternoon: '下午', evening: '晚上' };
+    reasons.push(`适合${timeMap[selections.time]}饮用`);
+  }
+  return reasons;
+}
+
+function renderRecommendations(recs, selections) {
+  if (recs.length === 0) {
+    document.getElementById('personal-result').innerHTML = `
+      <div class="result-empty">
+        <span class="result-empty-icon">🤔</span>
+        <p>没有找到完全匹配的茶饮<br>请尝试调整选择条件</p>
+      </div>`;
+    return;
+  }
+
+  const summaryText = generateSummary(selections);
+  document.getElementById('personal-result').innerHTML = `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">🍃</span>
+        <span style="font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--text)">茗语的推荐</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-light);line-height:1.6;padding:12px;background:var(--green-mist);border-radius:8px">${summaryText}</p>
+    </div>
+    ${recs.map((r, i) => `
+      <div class="result-tea-card" style="margin-bottom:12px;animation:slideUp ${0.3 + i * 0.15}s ease">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="font-size:32px">${r.tea.emoji}</span>
+          <div>
+            <h4>${i + 1}. ${r.tea.name}</h4>
+            <span style="font-size:12px;color:var(--text-muted)">${teaDatabase.categories.find(c => c.id === r.tea.category)?.name || ''} · 匹配度 ${Math.round(r.score / 10 * 100)}%</span>
+          </div>
+        </div>
+        <p>${r.tea.desc?.slice(0, 80) || ''}...</p>
+        ${r.reasons.map(reason => `
+          <div class="result-reason" style="margin-top:4px">✅ ${reason}</div>
+        `).join('')}
+        <div style="margin-top:8px;font-size:12px;color:var(--green)">
+          🫖 ${r.tea.brewing?.temp} · ${r.tea.brewing?.amount} · ${r.tea.brewing?.time}
+        </div>
+      </div>
+    `).join('')}
+    <div style="margin-top:8px;text-align:center">
+      <button class="btn btn-outline" style="font-size:13px" onclick="navigateTo('brewing')">
+        🫖 去冲泡助手看看
+      </button>
+    </div>
+  `;
+}
+
+function generateSummary(selections) {
+  const parts = [];
+  const healthMap = { tired: '最近有些疲劳', stomach: '胃不太舒服', heat: '感觉有些上火', cold: '有些受寒', diet: '饮食偏油腻', stress: '压力比较大', normal: '身体状况良好' };
+  const seasonMap = { spring: '正值春季', summer: '正值夏季', autumn: '正值秋季', winter: '正值冬季' };
+  const tasteMap = { floral: '偏好花香', fruity: '偏好果香', sweet: '喜欢清甜', rich: '喜欢醇厚', fresh: '喜欢清爽', roasted: '喜欢焙火香', aged: '喜欢陈香' };
+
+  if (selections.health) parts.push(healthMap[selections.health] || '');
+  if (selections.season) parts.push(seasonMap[selections.season] || '');
+  if (selections.taste) parts.push(tasteMap[selections.taste] || '');
+
+  return `根据你提供的信息——${parts.filter(Boolean).join('，')}，茗语为你推荐以下茶饮：`;
+}
+
+// ==================== PHOTO RECOGNITION ====================
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// 压缩到最长边 1024px，减少请求体积
+function compressImage(file, maxSide = 1024, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('读取图片失败'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('图片格式无法解析'));
+      img.onload = () => {
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('请选择图片文件');
+    return;
+  }
+
+  document.getElementById('upload-content').style.display = 'none';
+  document.getElementById('upload-processing').style.display = 'flex';
+
+  try {
+    uploadedImageData = await compressImage(file);
+    document.getElementById('upload-preview').innerHTML =
+      `<img src="${uploadedImageData}" alt="茶叶照片" style="max-height:240px;border-radius:12px;margin:0 auto">`;
+    await recognizeByAPI(uploadedImageData);
+  } catch (err) {
+    showToast(err.message || '图片处理失败');
+  } finally {
+    document.getElementById('upload-content').style.display = 'block';
+    document.getElementById('upload-processing').style.display = 'none';
+  }
+}
+
+// 优先调用视觉大模型；服务不可用时降级为本地近似
+async function recognizeByAPI(imageData) {
+  let res;
+  try {
+    res = await fetch('/api/recognize-tea', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageData })
+    });
+  } catch (e) {
+    return fallbackLocal(imageData, '未连接到识别服务');
+  }
+
+  if (!res.ok) {
+    let msg = '识别服务不可用';
+    try { msg = (await res.json()).error || msg; } catch (e) {}
+    return fallbackLocal(imageData, msg);
+  }
+
+  const payload = await res.json();
+  renderApiResult(payload.result);
+}
+
+async function fallbackLocal(imageData, reason) {
+  const local = await localAnalyze(imageData);
+  renderLocalResult(local, reason);
+}
+
+// 本地近似：估算背景色后统计前景主色，只判断茶类
+function localAnalyze(imageSrc) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      const size = 96;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      // 中心正方形裁剪，避免拉伸变形
+      const side = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+
+      const px = ctx.getImageData(0, 0, size, size).data;
+      const at = (x, y) => {
+        const i = (y * size + x) * 4;
+        return [px[i], px[i + 1], px[i + 2]];
+      };
+      const corners = [at(2, 2), at(size - 3, 2), at(2, size - 3), at(size - 3, size - 3)];
+      const bg = [0, 1, 2].map(k => corners.reduce((s, c) => s + c[k], 0) / corners.length);
+
+      const counts = { green: 0, black: 0, oolong: 0, white: 0, dark: 0 };
+      let total = 0;
+
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i], g = px[i + 1], b = px[i + 2];
+        // 跳过与四角背景接近的像素（桌面、白纸、手）
+        if (Math.abs(r - bg[0]) + Math.abs(g - bg[1]) + Math.abs(b - bg[2]) < 60) continue;
+        total++;
+
+        const brightness = (r + g + b) / 3;
+        const max = Math.max(r, g, b);
+        const sat = max === 0 ? 0 : (max - Math.min(r, g, b)) / max;
+
+        if (brightness > 215 && sat < 0.12) counts.white++;
+        else if (g >= r + 12 && g >= b + 8) counts.green++;
+        else if (brightness < 75) counts.dark++;
+        else if (r >= g + 18 && r >= b + 18) counts.black++;
+        else if (brightness >= 120) counts.oolong++;
+        else counts.black++;
+      }
+
+      if (total < size * size * 0.05) {
+        resolve({ category: null, ratio: 0 });
+        return;
+      }
+
+      let dominant = 'green', maxCount = 0;
+      for (const [key, count] of Object.entries(counts)) {
+        if (count > maxCount) { maxCount = count; dominant = key; }
+      }
+      resolve({ category: dominant, ratio: maxCount / total });
+    };
+    img.src = imageSrc;
+  });
+}
+
+function renderLocalResult(local, reason) {
+  const box = document.getElementById('recognition-result');
+  const notice = `<div class="local-notice">⚠️ ${escapeHtml(reason)}，已降级为本地近似识别（只判断茶类，不能确认具体茶名）</div>`;
+
+  if (!local || !local.category) {
+    box.innerHTML = `${notice}
+      <div class="result-empty">
+        <span class="result-empty-icon">🤔</span>
+        <p>没能在画面里找到茶叶<br><span style="font-size:13px">建议把干茶平铺在白纸上，从正上方拍摄</span></p>
+      </div>`;
+    return;
+  }
+
+  const cat = teaDatabase.categories.find(c => c.id === local.category);
+  const teas = teaDatabase.teas.filter(t => t.category === local.category);
+  const confidence = Math.min(70, 35 + Math.round(local.ratio * 40));
+
+  box.innerHTML = `
+    ${notice}
+    <div class="result-header" style="animation:slideUp 0.4s ease">
+      <div class="result-tea-icon">${cat ? cat.emoji : '🍵'}</div>
+      <div>
+        <h3 style="font-family:var(--font-serif);font-size:20px;color:var(--text)">推测茶类：${cat ? cat.name : '未知'}</h3>
+        <div class="result-confidence">
+          <span>参考度</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${confidence}%"></div></div>
+          <span>${confidence}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="result-desc">
+      <strong>🔬 本地分析</strong><br>
+      前景像素中占比最高的色系为「${cat ? cat.name : '未知'}」，占 ${Math.round(local.ratio * 100)}%。
+      该结果仅基于颜色，无法区分同色系的不同茶。
+    </div>
+    <div class="result-brew">
+      <h4>🍵 这一茶类可能包括</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+        ${teas.map(t => `<span class="tea-chip" onclick="navigateTo('encyclopedia');selectTeaForChat('${t.id}')">${t.emoji} ${t.name}</span>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function findTeaByName(name) {
+  if (!name) return null;
+  const n = String(name);
+  return teaDatabase.teas.find(t => n.includes(t.name) || t.name.includes(n)) || null;
+}
+
+function renderApiResult(result) {
+  const box = document.getElementById('recognition-result');
+  const r = result || {};
+
+  if (r.isTea === false || !Array.isArray(r.candidates) || r.candidates.length === 0) {
+    box.innerHTML = `
+      <div class="result-empty">
+        <span class="result-empty-icon">🤔</span>
+        <p>没能确认这是茶叶<br>
+          <span style="font-size:13px">${escapeHtml(r.note || r.observed || '建议把干茶平铺在白纸上，从正上方拍摄，避免逆光和阴影')}</span>
+        </p>
+      </div>`;
+    return;
+  }
+
+  const top = r.candidates[0];
+  const tea = findTeaByName(top.name);
+  const catName = top.category || teaDatabase.categories.find(c => c.id === tea?.category)?.name || '';
+
+  const others = r.candidates.slice(1);
+  const issues = (r.quality && r.quality.issues) || [];
+
+  box.innerHTML = `
+    <div class="result-header" style="animation:slideUp 0.4s ease">
+      <div class="result-tea-icon">${tea ? tea.emoji : '🍵'}</div>
+      <div>
+        <h3 style="font-family:var(--font-serif);font-size:20px;color:var(--text)">${escapeHtml(top.name)}</h3>
+        <div style="font-size:13px;color:var(--text-muted)">${escapeHtml(catName)}${tea && tea.origin ? ' · ' + escapeHtml(tea.origin) : ''}</div>
+        <div class="result-confidence">
+          <span>置信度</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${top.confidence}%"></div></div>
+          <span>${top.confidence}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-desc" style="animation:slideUp 0.45s ease">
+      <strong>🔍 观察到的特征</strong><br>${escapeHtml(r.observed || '—')}
+    </div>
+
+    ${(top.reasons || []).map(reason => `
+      <div class="result-reason">✅ ${escapeHtml(reason)}</div>
+    `).join('')}
+
+    ${r.difficulty ? `<div class="api-note">⚠️ 识别难点：${escapeHtml(r.difficulty)}</div>` : ''}
+    ${issues.length ? `<div class="api-note">📷 拍摄提示：${issues.map(escapeHtml).join('；')}</div>` : ''}
+
+    ${others.length ? `
+      <div class="result-brew">
+        <h4>其他可能</h4>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+          ${others.map(c => `
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-light)">
+              <span style="min-width:72px">${escapeHtml(c.name)}</span>
+              <div class="conf-bar" style="flex:1"><div class="conf-fill" style="width:${c.confidence}%"></div></div>
+              <span>${c.confidence}%</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    ${tea ? `
+      <div class="result-desc" style="margin-top:16px">
+        <strong>📝 茶叶介绍</strong><br>${tea.desc || '暂无详细介绍'}
+      </div>
+      <div class="result-brew">
+        <h4>🫖 推荐冲泡方案</h4>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px;color:var(--text-light)">
+          <div>🌡️ 水温：<strong>${tea.brewing?.temp || 'N/A'}</strong></div>
+          <div>⚖️ 投茶量：<strong>${tea.brewing?.amount || 'N/A'}</strong></div>
+          <div>⏱️ 时间：<strong>${tea.brewing?.time || 'N/A'}</strong></div>
+          <div>🫖 茶具：<strong>${tea.brewing?.vessel || 'N/A'}</strong></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px">
+        <button class="btn btn-primary" style="font-size:13px;flex:1" onclick="navigateTo('brewing');selectBrewingTea('${tea.id}')">🫖 去冲泡</button>
+        <button class="btn btn-outline" style="font-size:13px;flex:1" onclick="navigateTo('encyclopedia');selectTeaForChat('${tea.id}')">📖 了解更多</button>
+      </div>
+    ` : `<div class="api-note" style="margin-top:16px">知识库暂未收录「${escapeHtml(top.name)}」，仅提供识别结果。</div>`}
+  `;
+}
+
+function simulateRecognition() {
+  if (!uploadedImageData) {
+    showToast('请先上传一张茶叶照片');
+    return;
+  }
+  document.getElementById('upload-content').style.display = 'none';
+  document.getElementById('upload-processing').style.display = 'flex';
+  setTimeout(() => {
+    fallbackLocal(uploadedImageData, '手动切换').finally(() => {
+      document.getElementById('upload-content').style.display = 'block';
+      document.getElementById('upload-processing').style.display = 'none';
+    });
+  }, 300);
+}
+
+// ==================== UTILITIES ====================
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2500);
+}
+
+// Close sidebar when clicking main content on mobile
+document.addEventListener('click', (e) => {
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.querySelector('.mobile-nav-toggle');
+  if (window.innerWidth <= 768 &&
+      !sidebar.contains(e.target) &&
+      e.target !== toggle &&
+      !toggle.contains(e.target)) {
+    sidebar.classList.remove('open');
+  }
+});
+
+// ==================== DRAG AND DROP FOR PHOTO UPLOAD ====================
+const uploadZone = document.getElementById('upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('drag-over');
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      document.getElementById('photo-input').files = e.dataTransfer.files;
+      handlePhotoUpload({ target: { files: e.dataTransfer.files } });
+    }
+  });
+}
+</script>
+</body>
+</html>
